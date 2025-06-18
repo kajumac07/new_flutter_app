@@ -91,6 +91,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                                       ),
                                     ),
                                   ),
+
                                   SizedBox(width: 20.w),
 
                                   // User Info
