@@ -3,10 +3,10 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:new_flutter_app/app/core/constants/constdata.dart';
 import 'package:new_flutter_app/app/core/utils/app_styles.dart';
-import 'package:new_flutter_app/app/core/utils/toast_msg.dart';
+import 'package:new_flutter_app/app/global/controller/home_controller.dart';
 import 'package:new_flutter_app/app/global/widgets/glowing_icon_button.dart';
-import 'package:new_flutter_app/app/presentation/categoryDetail/category_detail_screen.dart';
 import 'package:new_flutter_app/app/presentation/cloudNotificationScreen/cloud_notification_screen.dart';
+import 'package:new_flutter_app/app/presentation/home/widgets/categories.dart';
 import 'package:new_flutter_app/app/presentation/home/widgets/drawer.dart';
 import 'package:new_flutter_app/app/presentation/profile/profile_details_screen.dart';
 import 'package:shimmer/shimmer.dart';
@@ -28,405 +28,387 @@ class _HomeScreenState extends State<HomeScreen> {
       key: _scaffoldKey,
       backgroundColor: kLightWhite,
       drawer: Builddrawer(),
-      body: CustomScrollView(
-        physics: BouncingScrollPhysics(),
-        slivers: [
-          // 1. Cosmic App Bar
-          SliverAppBar(
-            expandedHeight: 130.h,
-            floating: true,
-            pinned: true,
-            snap: true,
-            stretch: true,
-            backgroundColor: kWhite,
-            flexibleSpace: FlexibleSpaceBar(
-              collapseMode: CollapseMode.pin,
-              title: Text(
-                'J-Junction',
-                style: appStyle(25, kDark, FontWeight.w900).copyWith(
-                  letterSpacing: 1.5,
-                  shadows: [
-                    Shadow(
-                      color: kWhite.withOpacity(0.5),
-                      blurRadius: 1,
-                      offset: Offset(2, 2),
+      body: GetBuilder<HomeScreenController>(
+        init: HomeScreenController(),
+        builder: (controller) {
+          return CustomScrollView(
+            physics: BouncingScrollPhysics(),
+            slivers: [
+              // 1. Cosmic App Bar
+              SliverAppBar(
+                expandedHeight: 130.h,
+                floating: true,
+                pinned: true,
+                snap: true,
+                stretch: true,
+                backgroundColor: kWhite,
+                flexibleSpace: FlexibleSpaceBar(
+                  collapseMode: CollapseMode.pin,
+                  title: Text(
+                    'J-Junction',
+                    style: appStyle(25, kDark, FontWeight.w900).copyWith(
+                      letterSpacing: 1.5,
+                      shadows: [
+                        Shadow(
+                          color: kWhite.withOpacity(0.5),
+                          blurRadius: 1,
+                          offset: Offset(2, 2),
+                        ),
+                      ],
                     ),
-                  ],
+                  ),
+                  centerTitle: true,
+                ),
+                leading: IconButton(
+                  icon: Icon(
+                    Icons.menu_rounded,
+                    color: kSecondary,
+                    size: 28.sp,
+                  ),
+                  onPressed: () => _scaffoldKey.currentState!.openDrawer(),
+                ),
+                actions: [
+                  GlowingIconButton(
+                    icon: Icons.notifications,
+                    badge: true,
+                    onTap: () => Get.to(() => CloudNotificationScreen()),
+                  ),
+
+                  SizedBox(width: 5.w),
+                  GlowingIconButton(
+                    icon: Icons.person,
+                    onTap: () => Get.to(() => UserProfileScreen()),
+                  ),
+                  SizedBox(width: 5.w),
+                ],
+              ),
+
+              // 2. Interstellar Hero Carousel
+              SliverToBoxAdapter(
+                child: SizedBox(
+                  height: 320.h,
+                  child: PageView.builder(
+                    itemCount: 3,
+                    controller: PageController(viewportFraction: 0.85),
+                    padEnds: false,
+                    itemBuilder: (_, index) {
+                      return Padding(
+                        padding: EdgeInsets.symmetric(
+                          horizontal: 8.w,
+                          vertical: 20.h,
+                        ),
+                        child: _GalacticDestinationCard(
+                          imageUrl: [
+                            'https://images.unsplash.com/photo-1520250497591-112f2f40a3f4',
+                            'https://images.unsplash.com/photo-1506929562872-bb421503ef21',
+                            'https://images.unsplash.com/photo-1464037866556-6812c9d1c72e',
+                          ][index],
+                          title: [
+                            'Cosmic Himalayas',
+                            'Nebula Beaches',
+                            'Stellar Deserts',
+                          ][index],
+                          subtitle: [
+                            '5D Experience',
+                            'Infinite Relaxation',
+                            'Martian Vibes',
+                          ][index],
+                        ),
+                      );
+                    },
+                  ),
                 ),
               ),
-              centerTitle: true,
-            ),
-            leading: IconButton(
-              icon: Icon(Icons.menu_rounded, color: kSecondary, size: 28.sp),
-              onPressed: () => _scaffoldKey.currentState!.openDrawer(),
-            ),
-            actions: [
-              GlowingIconButton(
-                icon: Icons.notifications,
-                badge: true,
-                onTap: () => Get.to(() => CloudNotificationScreen()),
+
+              // 3. Warp-Speed Categories
+              CategoriesSection(controller: controller),
+              // 4. Nebula Stories
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: EdgeInsets.only(left: 20.w, top: 20.h, bottom: 10.h),
+                  child: Text(
+                    'TRENDING STORIES',
+                    style: appStyle(
+                      20,
+                      kDark,
+                      FontWeight.w800,
+                    ).copyWith(letterSpacing: 1.5),
+                  ),
+                ),
+              ),
+              SliverToBoxAdapter(
+                child: SizedBox(
+                  height: 260.h,
+                  child: ListView.builder(
+                    scrollDirection: Axis.horizontal,
+                    padding: EdgeInsets.only(left: 20.w, right: 20.w),
+                    itemCount: 4,
+                    itemBuilder: (_, index) {
+                      return _QuantumStoryCard(
+                        imageUrl: [
+                          'https://images.unsplash.com/photo-1597735881932-d9664c9bbcea?q=80&w=2497&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
+                          'https://images.unsplash.com/photo-1527631746610-bca00a040d60',
+                          'https://images.unsplash.com/photo-1501785888041-af3ef285b470',
+                          'https://images.unsplash.com/photo-1464037866556-6812c9d1c72e',
+                        ][index],
+                        title: [
+                          'Kerala Culture',
+                          'Black Hole Dive',
+                          'Supernova Camp',
+                          'Andromeda Tour',
+                        ][index],
+                        author: [
+                          'Dr. Space',
+                          'Cosmo Girl',
+                          'Star Lord',
+                          'Galaxy Queen',
+                        ][index],
+                      );
+                    },
+                  ),
+                ),
               ),
 
-              SizedBox(width: 5.w),
-              GlowingIconButton(
-                icon: Icons.person,
-                onTap: () => Get.to(() => UserProfileScreen()),
+              // 5. Celestial Destinations
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: EdgeInsets.only(left: 20.w, top: 30.h, bottom: 10.h),
+                  child: Text(
+                    'CELESTIAL DESTINATIONS',
+                    style: appStyle(
+                      20,
+                      kDark,
+                      FontWeight.w800,
+                    ).copyWith(letterSpacing: 1.5),
+                  ),
+                ),
               ),
-              SizedBox(width: 5.w),
-            ],
-          ),
-
-          // 2. Interstellar Hero Carousel
-          SliverToBoxAdapter(
-            child: SizedBox(
-              height: 320.h,
-              child: PageView.builder(
-                itemCount: 3,
-                controller: PageController(viewportFraction: 0.85),
-                padEnds: false,
-                itemBuilder: (_, index) {
-                  return Padding(
-                    padding: EdgeInsets.symmetric(
-                      horizontal: 8.w,
-                      vertical: 20.h,
-                    ),
-                    child: _GalacticDestinationCard(
+              SliverPadding(
+                padding: EdgeInsets.symmetric(horizontal: 20.w),
+                sliver: SliverGrid(
+                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 2,
+                    childAspectRatio: 1.3,
+                    mainAxisSpacing: 16.h,
+                    crossAxisSpacing: 16.w,
+                  ),
+                  delegate: SliverChildBuilderDelegate((_, index) {
+                    return _StellarDestination(
                       imageUrl: [
                         'https://images.unsplash.com/photo-1520250497591-112f2f40a3f4',
                         'https://images.unsplash.com/photo-1506929562872-bb421503ef21',
                         'https://images.unsplash.com/photo-1464037866556-6812c9d1c72e',
+                        'https://images.unsplash.com/photo-1665481512574-44b527856b71?q=80&w=3087&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
                       ][index],
                       title: [
-                        'Cosmic Himalayas',
-                        'Nebula Beaches',
-                        'Stellar Deserts',
+                        'Moon Resort',
+                        'Mars Colony',
+                        'Jupiter Spa',
+                        'Venus Retreat',
                       ][index],
-                      subtitle: [
-                        '5D Experience',
-                        'Infinite Relaxation',
-                        'Martian Vibes',
-                      ][index],
-                    ),
-                  );
-                },
+                    );
+                  }, childCount: 4),
+                ),
               ),
-            ),
-          ),
 
-          // 3. Warp-Speed Categories
-          SliverPadding(
-            padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 10.h),
-            sliver: SliverGrid(
-              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 4,
-                childAspectRatio: 0.9,
-                mainAxisSpacing: 12.h,
-                crossAxisSpacing: 12.w,
-              ),
-              delegate: SliverChildBuilderDelegate((_, index) {
-                return _HolographicCategory(
-                  emoji: [
-                    '⛰️',
-                    '🏖️',
-                    '🏛️',
-                    '🏕️',
-                    '🍜',
-                    '🛕',
-                    '🛒',
-                    '🎭',
-                  ][index],
-                  label: [
-                    'Mountains',
-                    'Beaches',
-                    'Heritage',
-                    'Camping',
-                    'Food',
-                    'Spiritual',
-                    'Shopping',
-                    'Culture',
-                  ][index],
-                );
-              }, childCount: 8),
-            ),
-          ),
-
-          // 4. Nebula Stories
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: EdgeInsets.only(left: 20.w, top: 20.h, bottom: 10.h),
-              child: Text(
-                'TRENDING STORIES',
-                style: appStyle(
-                  20,
-                  kDark,
-                  FontWeight.w800,
-                ).copyWith(letterSpacing: 1.5),
-              ),
-            ),
-          ),
-          SliverToBoxAdapter(
-            child: SizedBox(
-              height: 260.h,
-              child: ListView.builder(
-                scrollDirection: Axis.horizontal,
-                padding: EdgeInsets.only(left: 20.w, right: 20.w),
-                itemCount: 4,
-                itemBuilder: (_, index) {
-                  return _QuantumStoryCard(
-                    imageUrl: [
-                      'https://images.unsplash.com/photo-1597735881932-d9664c9bbcea?q=80&w=2497&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
-                      'https://images.unsplash.com/photo-1527631746610-bca00a040d60',
-                      'https://images.unsplash.com/photo-1501785888041-af3ef285b470',
-                      'https://images.unsplash.com/photo-1464037866556-6812c9d1c72e',
-                    ][index],
-                    title: [
-                      'Kerala Culture',
-                      'Black Hole Dive',
-                      'Supernova Camp',
-                      'Andromeda Tour',
-                    ][index],
-                    author: [
-                      'Dr. Space',
-                      'Cosmo Girl',
-                      'Star Lord',
-                      'Galaxy Queen',
-                    ][index],
-                  );
-                },
-              ),
-            ),
-          ),
-
-          // 5. Celestial Destinations
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: EdgeInsets.only(left: 20.w, top: 30.h, bottom: 10.h),
-              child: Text(
-                'CELESTIAL DESTINATIONS',
-                style: appStyle(
-                  20,
-                  kDark,
-                  FontWeight.w800,
-                ).copyWith(letterSpacing: 1.5),
-              ),
-            ),
-          ),
-          SliverPadding(
-            padding: EdgeInsets.symmetric(horizontal: 20.w),
-            sliver: SliverGrid(
-              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2,
-                childAspectRatio: 1.3,
-                mainAxisSpacing: 16.h,
-                crossAxisSpacing: 16.w,
-              ),
-              delegate: SliverChildBuilderDelegate((_, index) {
-                return _StellarDestination(
-                  imageUrl: [
-                    'https://images.unsplash.com/photo-1520250497591-112f2f40a3f4',
-                    'https://images.unsplash.com/photo-1506929562872-bb421503ef21',
-                    'https://images.unsplash.com/photo-1464037866556-6812c9d1c72e',
-                    'https://images.unsplash.com/photo-1665481512574-44b527856b71?q=80&w=3087&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
-                  ][index],
-                  title: [
-                    'Moon Resort',
-                    'Mars Colony',
-                    'Jupiter Spa',
-                    'Venus Retreat',
-                  ][index],
-                );
-              }, childCount: 4),
-            ),
-          ),
-
-          // 6. Astral Testimonials
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: EdgeInsets.only(left: 20.w, top: 40.h, bottom: 10.h),
-              child: Text(
-                'TESTIMONIALS',
-                style: appStyle(
-                  20,
-                  kDark,
-                  FontWeight.w800,
-                ).copyWith(letterSpacing: 1.5),
-              ),
-            ),
-          ),
-          SliverToBoxAdapter(
-            child: SizedBox(
-              height: 220.h,
-              child: ListView.builder(
-                scrollDirection: Axis.horizontal,
-                padding: EdgeInsets.only(left: 20.w, right: 20.w),
-                itemCount: 3,
-                itemBuilder: (_, index) {
-                  return _CosmicTestimonial(
-                    avatarUrl:
-                        'https://randomuser.me/api/portraits/women/${index + 30}.jpg',
-                    name: ['Dimple', 'Kaju', 'Darling'][index],
-                    quote: [
-                      'This app teleported me to another dimension of travel!',
-                      'Never imagined experiencing zero-gravity tourism so easily!',
-                      'Worth every light-year traveled for these experiences!',
-                    ][index],
-                  );
-                },
-              ),
-            ),
-          ),
-
-          // 7. Modern Footer
-          SliverToBoxAdapter(
-            child: Container(
-              margin: EdgeInsets.only(top: 40.h),
-              padding: EdgeInsets.symmetric(vertical: 40.h, horizontal: 20.w),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.vertical(top: Radius.circular(40.r)),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.05),
-                    blurRadius: 30,
-                    spreadRadius: 5,
-                    offset: Offset(0, -10),
+              // 6. Astral Testimonials
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: EdgeInsets.only(left: 20.w, top: 40.h, bottom: 10.h),
+                  child: Text(
+                    'TESTIMONIALS',
+                    style: appStyle(
+                      20,
+                      kDark,
+                      FontWeight.w800,
+                    ).copyWith(letterSpacing: 1.5),
                   ),
-                ],
+                ),
               ),
-              child: Column(
-                children: [
-                  // Decorative Top Border
-                  Container(
-                    width: 60.w,
-                    height: 4.h,
-                    decoration: BoxDecoration(
-                      color: kSecondary,
-                      borderRadius: BorderRadius.circular(2.r),
-                    ),
+              SliverToBoxAdapter(
+                child: SizedBox(
+                  height: 220.h,
+                  child: ListView.builder(
+                    scrollDirection: Axis.horizontal,
+                    padding: EdgeInsets.only(left: 20.w, right: 20.w),
+                    itemCount: 3,
+                    itemBuilder: (_, index) {
+                      return _CosmicTestimonial(
+                        avatarUrl:
+                            'https://randomuser.me/api/portraits/women/${index + 30}.jpg',
+                        name: ['Dimple', 'Kaju', 'Darling'][index],
+                        quote: [
+                          'This app teleported me to another dimension of travel!',
+                          'Never imagined experiencing zero-gravity tourism so easily!',
+                          'Worth every light-year traveled for these experiences!',
+                        ][index],
+                      );
+                    },
                   ),
-                  SizedBox(height: 30.h),
+                ),
+              ),
 
-                  // App Logo
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(
-                        Icons.airplanemode_active,
-                        size: 28.sp,
-                        color: Color(0xFF2A2B2E),
-                      ),
-                      SizedBox(width: 8.w),
-                      Text(
-                        appName,
-                        style: TextStyle(
-                          fontSize: 24.sp,
-                          fontWeight: FontWeight.w900,
-                          color: Color(0xFF2A2B2E),
-                          letterSpacing: 1.5,
-                        ),
+              // 7. Modern Footer
+              SliverToBoxAdapter(
+                child: Container(
+                  margin: EdgeInsets.only(top: 40.h),
+                  padding: EdgeInsets.symmetric(
+                    vertical: 40.h,
+                    horizontal: 20.w,
+                  ),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.vertical(
+                      top: Radius.circular(40.r),
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.05),
+                        blurRadius: 30,
+                        spreadRadius: 5,
+                        offset: Offset(0, -10),
                       ),
                     ],
                   ),
-                  SizedBox(height: 10.h),
-                  Text(
-                    appTagLine,
-                    style: TextStyle(
-                      fontSize: 14.sp,
-                      color: Color(0xFF2A2B2E).withOpacity(0.6),
-                    ),
-                  ),
-                  SizedBox(height: 30.h),
+                  child: Column(
+                    children: [
+                      // Decorative Top Border
+                      Container(
+                        width: 60.w,
+                        height: 4.h,
+                        decoration: BoxDecoration(
+                          color: kSecondary,
+                          borderRadius: BorderRadius.circular(2.r),
+                        ),
+                      ),
+                      SizedBox(height: 30.h),
 
-                  // Main CTA
-                  Container(
-                    width: double.infinity,
-                    height: 56.h,
-                    margin: EdgeInsets.symmetric(horizontal: 40.w),
-                    decoration: BoxDecoration(
-                      color: kSecondary,
-                      borderRadius: BorderRadius.circular(28.r),
-                    ),
-                    child: Material(
-                      color: Colors.transparent,
-                      child: InkWell(
-                        borderRadius: BorderRadius.circular(28.r),
-                        onTap: () {
-                          widget.onTap!();
-                        },
-                        splashColor: Colors.white.withOpacity(0.1),
-                        highlightColor: Colors.transparent,
-                        child: Center(
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(
-                                Icons.rocket_launch,
-                                size: 20.sp,
-                                color: Colors.white,
+                      // App Logo
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.airplanemode_active,
+                            size: 28.sp,
+                            color: Color(0xFF2A2B2E),
+                          ),
+                          SizedBox(width: 8.w),
+                          Text(
+                            appName,
+                            style: TextStyle(
+                              fontSize: 24.sp,
+                              fontWeight: FontWeight.w900,
+                              color: Color(0xFF2A2B2E),
+                              letterSpacing: 1.5,
+                            ),
+                          ),
+                        ],
+                      ),
+                      SizedBox(height: 10.h),
+                      Text(
+                        appTagLine,
+                        style: TextStyle(
+                          fontSize: 14.sp,
+                          color: Color(0xFF2A2B2E).withOpacity(0.6),
+                        ),
+                      ),
+                      SizedBox(height: 30.h),
+
+                      // Main CTA
+                      Container(
+                        width: double.infinity,
+                        height: 56.h,
+                        margin: EdgeInsets.symmetric(horizontal: 40.w),
+                        decoration: BoxDecoration(
+                          color: kSecondary,
+                          borderRadius: BorderRadius.circular(28.r),
+                        ),
+                        child: Material(
+                          color: Colors.transparent,
+                          child: InkWell(
+                            borderRadius: BorderRadius.circular(28.r),
+                            onTap: () {
+                              widget.onTap!();
+                            },
+                            splashColor: Colors.white.withOpacity(0.1),
+                            highlightColor: Colors.transparent,
+                            child: Center(
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(
+                                    Icons.rocket_launch,
+                                    size: 20.sp,
+                                    color: Colors.white,
+                                  ),
+                                  SizedBox(width: 10.w),
+                                  Text(
+                                    'EXPLORE NOW',
+                                    style: TextStyle(
+                                      fontSize: 16.sp,
+                                      fontWeight: FontWeight.w700,
+                                      color: Colors.white,
+                                      letterSpacing: 1.2,
+                                    ),
+                                  ),
+                                ],
                               ),
-                              SizedBox(width: 10.w),
-                              Text(
-                                'EXPLORE NOW',
-                                style: TextStyle(
-                                  fontSize: 16.sp,
-                                  fontWeight: FontWeight.w700,
-                                  color: Colors.white,
-                                  letterSpacing: 1.2,
-                                ),
-                              ),
-                            ],
+                            ),
                           ),
                         ),
                       ),
-                    ),
-                  ),
 
-                  SizedBox(height: 30.h),
+                      SizedBox(height: 30.h),
 
-                  // Social Links
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      _SocialCircle(
-                        icon: Icons.install_desktop,
-                        color: kSecondary,
+                      // Social Links
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          _SocialCircle(
+                            icon: Icons.install_desktop,
+                            color: kSecondary,
+                          ),
+                          SizedBox(width: 20.w),
+                          _SocialCircle(
+                            icon: Icons.facebook,
+                            color: kSecondary,
+                          ),
+                          SizedBox(width: 20.w),
+                          _SocialCircle(
+                            icon: Icons.travel_explore,
+                            color: kSecondary,
+                          ),
+                        ],
                       ),
-                      SizedBox(width: 20.w),
-                      _SocialCircle(icon: Icons.facebook, color: kSecondary),
-                      SizedBox(width: 20.w),
-                      _SocialCircle(
-                        icon: Icons.travel_explore,
-                        color: kSecondary,
+                      SizedBox(height: 30.h),
+
+                      // Legal Text
+                      Column(
+                        children: [
+                          Text(
+                            '© 2025 journey junction App',
+                            style: TextStyle(
+                              fontSize: 12.sp,
+                              color: Color(0xFF2A2B2E).withOpacity(0.4),
+                            ),
+                          ),
+                          SizedBox(height: 8.h),
+                          Text(
+                            'Made with ❤️ for travelers.',
+                            style: TextStyle(
+                              fontSize: 12.sp,
+                              color: Color(0xFF2A2B2E).withOpacity(0.4),
+                            ),
+                          ),
+                        ],
                       ),
                     ],
                   ),
-                  SizedBox(height: 30.h),
-
-                  // Legal Text
-                  Column(
-                    children: [
-                      Text(
-                        '© 2025 journey junction App',
-                        style: TextStyle(
-                          fontSize: 12.sp,
-                          color: Color(0xFF2A2B2E).withOpacity(0.4),
-                        ),
-                      ),
-                      SizedBox(height: 8.h),
-                      Text(
-                        'Made with ❤️ for travelers.',
-                        style: TextStyle(
-                          fontSize: 12.sp,
-                          color: Color(0xFF2A2B2E).withOpacity(0.4),
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
+                ),
               ),
-            ),
-          ),
-        ],
+            ],
+          );
+        },
       ),
     );
   }
@@ -449,7 +431,6 @@ Widget buildListTile(String iconName, String title, void Function() onTap) {
   );
 }
 
-// Social Circle Widget
 class _SocialCircle extends StatelessWidget {
   final IconData icon;
   final Color color;
@@ -572,52 +553,6 @@ class _GalacticDestinationCard extends StatelessWidget {
             ),
           ),
         ],
-      ),
-    );
-  }
-}
-
-class _HolographicCategory extends StatelessWidget {
-  final String emoji;
-  final String label;
-
-  const _HolographicCategory({required this.emoji, required this.label});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16.r),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 10,
-            spreadRadius: 2,
-          ),
-        ],
-      ),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          borderRadius: BorderRadius.circular(16.r),
-          onTap: () {
-            Get.to(
-              () => CategoryDetailScreen(
-                categoryName: label,
-                categoryColor: kPrimary,
-              ),
-            );
-          },
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(emoji, style: TextStyle(fontSize: 28.sp)),
-              SizedBox(height: 8.h),
-              Text(label, style: appStyleRaleway(11, kDark, FontWeight.w600)),
-            ],
-          ),
-        ),
       ),
     );
   }
