@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:new_flutter_app/app/core/constants/constdata.dart';
+import 'package:new_flutter_app/app/core/services/user_service.dart';
 import 'package:new_flutter_app/app/core/utils/app_styles.dart';
 import 'package:new_flutter_app/app/core/utils/toast_msg.dart';
 import 'package:new_flutter_app/app/global/controller/profile_controller.dart';
@@ -15,6 +16,7 @@ class Builddrawer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final userService = UserService.to;
     return ClipRRect(
       borderRadius: BorderRadius.only(
         topRight: Radius.circular(30.r),
@@ -218,7 +220,9 @@ class Builddrawer extends StatelessWidget {
                                     FontWeight.normal,
                                   ),
                                 ),
-                                onPressed: () {},
+                                onPressed: () async {
+                                  await userService.signOut();
+                                },
                               ),
                               TextButton(
                                 onPressed: () => Navigator.pop(dialogContext),

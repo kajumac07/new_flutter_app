@@ -21,7 +21,6 @@ class UserService extends GetxService {
       return;
     }
     log("User signed in: ${user.email}");
-    // If needed, you can fetch other user data here.
   }
 
   Future<void> signOut() async {

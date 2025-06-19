@@ -1,9 +1,16 @@
+import 'dart:developer';
+import 'package:get/get.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'dart:io';
 import 'package:image_picker/image_picker.dart';
 import 'package:new_flutter_app/app/core/constants/constdata.dart';
+import 'package:new_flutter_app/app/core/services/collection_refrence.dart';
 import 'package:new_flutter_app/app/core/utils/toast_msg.dart';
+import 'package:new_flutter_app/app/global/controller/profile_controller.dart';
+import 'package:new_flutter_app/app/global/helper/location_picker_sheet.dart';
+import 'package:new_flutter_app/app/global/helper/tags_editor.dart';
 import 'package:new_flutter_app/app/global/models/category_model.dart';
 
 class AddPostScreen extends StatefulWidget {
@@ -14,46 +21,61 @@ class AddPostScreen extends StatefulWidget {
 }
 
 class _AddPostScreenState extends State<AddPostScreen> {
-  final _formKey = GlobalKey<FormState>();
   final TextEditingController _titleController = TextEditingController();
   final TextEditingController _descriptionController = TextEditingController();
   final TextEditingController _locationController = TextEditingController();
   final TextEditingController _tagsController = TextEditingController();
 
+  final profileController = Get.put(ProfileController());
+
   List<XFile> _mediaFiles = [];
-  String? _selectedCategory;
   DateTime? _scheduledDate;
   bool _isPublic = true;
-  List<String> _mentionedUsers = [];
   List<String> _tags = [];
+  bool _isLoading = false;
 
-  List<CategoryModel> categoryList = [];
+  List<CategoryItem> _allCategories = [];
+  String? _selectedCategoryId;
+  bool _isLoadingCategories = true;
+
+  // Colors for category chips
+  final List<Color> _categoryColors = [
+    const Color(0xFF4285F4), // Blue
+    const Color(0xFF34A853), // Green
+    const Color(0xFFEA4335), // Red
+    const Color(0xFFFBBC05), // Yellow
+    const Color(0xFF673AB7), // Purple
+    const Color(0xFFFF5722), // Deep Orange
+    const Color(0xFF009688), // Teal
+    const Color(0xFFE91E63), // Pink
+  ];
+
+  @override
+  void initState() {
+    super.initState();
+    fetchCategories();
+  }
 
   void fetchCategories() async {
     try {
+      setState(() => _isLoadingCategories = true);
       final snapshot = await FirebaseFirestore.instance
           .collection("Categories")
           .get();
 
-      categoryList = snapshot.docs.map((doc) {
-        return CategoryModel.fromDoc(doc.id, doc.data());
-      }).toList();
+      // Flatten all categories from all documents
+      _allCategories = [];
+      for (var doc in snapshot.docs) {
+        final categoryModel = CategoryModel.fromDoc(doc.id, doc.data());
+        _allCategories.addAll(categoryModel.lists);
+      }
+
       setState(() {});
     } catch (e) {
-      showToastMessage("Error", e.toString(), kRed);
+      // Handle error
     } finally {
-      // Ensure UI updates after loading
-      setState(() {});
+      setState(() => _isLoadingCategories = false);
     }
-  }
-
-  @override
-  void dispose() {
-    _titleController.dispose();
-    _descriptionController.dispose();
-    _locationController.dispose();
-    _tagsController.dispose();
-    super.dispose();
   }
 
   Future<void> _pickMedia() async {
@@ -64,6 +86,34 @@ class _AddPostScreenState extends State<AddPostScreen> {
         _mediaFiles = pickedFiles;
       });
     }
+  }
+
+  Future<List<String>> _uploadMediaFiles() async {
+    List<String> downloadUrls = [];
+    final storage = FirebaseStorage.instance;
+
+    for (var mediaFile in _mediaFiles) {
+      try {
+        // Create a unique filename
+        String fileName =
+            'posts/$currentUId/${DateTime.now().millisecondsSinceEpoch}_${mediaFile.name}';
+
+        // Upload the file
+        TaskSnapshot snapshot = await storage
+            .ref(fileName)
+            .putFile(File(mediaFile.path));
+
+        // Get download URL
+        String downloadUrl = await snapshot.ref.getDownloadURL();
+        downloadUrls.add(downloadUrl);
+      } catch (e) {
+        log('Error uploading file: $e');
+        // You might want to continue with other files or abort
+        rethrow;
+      }
+    }
+
+    return downloadUrls;
   }
 
   void _removeMedia(int index) {
@@ -96,6 +146,7 @@ class _AddPostScreenState extends State<AddPostScreen> {
     );
     if (picked != null) {
       final TimeOfDay? time = await showTimePicker(
+        // ignore: use_build_context_synchronously
         context: context,
         initialTime: TimeOfDay.now(),
       );
@@ -113,31 +164,132 @@ class _AddPostScreenState extends State<AddPostScreen> {
     }
   }
 
-  void _submitPost() {
-    if (_formKey.currentState!.validate()) {
-      // TODO: Implement post submission logic
-      // Include all the collected data:
-      // - _mediaFiles
-      // - _titleController.text
-      // - _descriptionController.text
-      // - _selectedCategory
-      // - _locationController.text (if not empty)
-      // - _isPublic
-      // - _tags
-      // - _scheduledDate (if not null)
-      // - _mentionedUsers
+  Future<void> _submitPost() async {
+    try {
+      setState(() => _isLoading = true);
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Post submitted successfully!')),
-      );
-      Navigator.pop(context);
+      // 1. Upload media files to storage
+      List<String> mediaUrls = [];
+      if (_mediaFiles.isNotEmpty) {
+        mediaUrls = await _uploadMediaFiles();
+      }
+
+      // Create a batch write
+      final batch = FirebaseFirestore.instance.batch();
+
+      // Create a new document reference with auto-generated ID
+      final postRef = FirebaseFirestore.instance.collection('Posts').doc();
+
+      // 2. Prepare post data
+      final postData = {
+        'uid': currentUId,
+        'postId': postRef.id,
+        'title': _titleController.text.trim(),
+        'description': _descriptionController.text.trim(),
+        'media': mediaUrls,
+        'category': _selectedCategoryId != null ? [_selectedCategoryId!] : [],
+        'location': _locationController.text.trim(),
+        'isPublic': _isPublic,
+        'allowComments': true,
+        'tags': _tags,
+        'created_at': FieldValue.serverTimestamp(),
+        'likes': [],
+        'comments': [],
+        'scheduled_at': _scheduledDate ?? DateTime.now(),
+        'status': _scheduledDate == null ? 'published' : 'scheduled',
+      };
+
+      // 3. Save to Firestore
+      batch.set(postRef, postData);
+      // Commit the batch
+      await batch.commit();
+      // 4. Show success and close
+      showToastMessage("Success", "Post Published Successfully", kPrimary);
+      setState(() {
+        _isLoading = false;
+      });
+      _resetForm();
+    } catch (e) {
+      showToastMessage("Error", "Error Publishing Post $e", kRed);
+    } finally {
+      setState(() => _isLoading = false);
     }
   }
 
-  @override
-  void initState() {
-    super.initState();
-    fetchCategories();
+  Widget _buildCategoryChips() {
+    if (_isLoadingCategories) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    if (_allCategories.isEmpty) {
+      return const Text('No categories available');
+    }
+
+    return Wrap(
+      spacing: 8,
+      runSpacing: 8,
+      children: _allCategories.map((category) {
+        final colorIndex =
+            _allCategories.indexOf(category) % _categoryColors.length;
+        final color = _categoryColors[colorIndex];
+
+        return FilterChip(
+          selected: _selectedCategoryId == category.label,
+          label: Text(
+            category.label,
+            style: TextStyle(
+              color: _selectedCategoryId == category.label
+                  ? Colors.white
+                  : color,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+          avatar: category.emoji.isNotEmpty ? Text(category.emoji) : null,
+          onSelected: (selected) {
+            setState(() {
+              _selectedCategoryId = selected ? category.label : null;
+            });
+          },
+          backgroundColor: Colors.white,
+          selectedColor: color,
+          side: BorderSide(color: color.withOpacity(0.3), width: 1.5),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
+          elevation: 0,
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          showCheckmark: false,
+        );
+      }).toList(),
+    );
+  }
+
+  void _resetForm() {
+    // Clear text fields
+    _titleController.clear();
+    _descriptionController.clear();
+    _locationController.clear();
+    _tagsController.clear();
+
+    // Clear media files
+    setState(() {
+      _mediaFiles = [];
+    });
+
+    // Reset category selection
+    setState(() {
+      _selectedCategoryId = null;
+    });
+
+    // Reset tags
+    setState(() {
+      _tags = [];
+    });
+
+    // Reset schedule
+    setState(() {
+      _scheduledDate = null;
+    });
   }
 
   @override
@@ -147,40 +299,44 @@ class _AddPostScreenState extends State<AddPostScreen> {
       appBar: AppBar(
         title: const Text(
           'Create Post',
-          style: TextStyle(fontWeight: FontWeight.bold),
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: 20,
+            letterSpacing: 0.5,
+          ),
         ),
         centerTitle: true,
         elevation: 0,
         backgroundColor: Colors.white,
-        foregroundColor: Colors.black,
+        foregroundColor: Colors.black87,
         actions: [
           IconButton(
-            icon: const Icon(Icons.close),
+            icon: const Icon(Icons.close, size: 24),
             onPressed: () => Navigator.pop(context),
           ),
         ],
       ),
       body: SingleChildScrollView(
         child: Padding(
-          padding: const EdgeInsets.all(16.0),
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // Author Info
-              _buildAuthorInfo(),
-              const SizedBox(height: 20),
+              _buildAuthorInfo(profileController),
+              const SizedBox(height: 24),
 
               // Media Upload
               _buildMediaUploadSection(),
-              const SizedBox(height: 25),
+              const SizedBox(height: 28),
 
               // Post Content
               _buildPostContentSection(),
-              const SizedBox(height: 25),
+              const SizedBox(height: 28),
 
               // Post Settings
               _buildPostSettingsSection(),
-              const SizedBox(height: 30),
+              const SizedBox(height: 32),
 
               // Submit Button
               _buildSubmitButton(),
@@ -191,39 +347,72 @@ class _AddPostScreenState extends State<AddPostScreen> {
     );
   }
 
-  Widget _buildAuthorInfo() {
-    return Row(
-      children: [
-        const CircleAvatar(
-          radius: 20,
-          backgroundImage: NetworkImage(
-            'https://randomuser.me/api/portraits/men/1.jpg',
+  Widget _buildAuthorInfo(profileController) {
+    final user = profileController.currentUser;
+    if (profileController.isLoading) {
+      return const Center(child: CircularProgressIndicator());
+    }
+    if (user == null) {
+      return const Center(child: Text('User not found'));
+    }
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 8,
+            offset: const Offset(0, 4),
           ),
-        ),
-        const SizedBox(width: 12),
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              'John Doe',
-              style: TextStyle(fontWeight: FontWeight.bold),
+        ],
+      ),
+      child: Row(
+        children: [
+          CircleAvatar(
+            radius: 22,
+            backgroundImage: NetworkImage(
+              user?.profilePicture.isNotEmpty
+                  ? user.profilePicture
+                  : 'https://via.placeholder.com/150',
             ),
-            Text(
-              _isPublic ? 'Public' : 'Private',
-              style: TextStyle(color: Colors.grey[600], fontSize: 12),
+          ),
+          const SizedBox(width: 14),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                user?.fullName ?? 'Anonymous',
+                style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
+              ),
+              const SizedBox(height: 2),
+              Text(
+                _isPublic ? 'Visible to everyone' : 'Visible to you only',
+                style: TextStyle(color: Colors.grey[600], fontSize: 12),
+              ),
+            ],
+          ),
+          const Spacer(),
+          IconButton(
+            icon: Container(
+              padding: const EdgeInsets.all(6),
+              decoration: BoxDecoration(
+                color: _isPublic ? Colors.blue[50] : Colors.grey[200],
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                _isPublic ? Icons.public : Icons.lock_outline,
+                size: 20,
+                color: _isPublic ? Colors.blue : Colors.grey[700],
+              ),
             ),
-          ],
-        ),
-        const Spacer(),
-        IconButton(
-          icon: Icon(_isPublic ? Icons.public : Icons.lock_outline, size: 20),
-          onPressed: () {
-            setState(() {
-              _isPublic = !_isPublic;
-            });
-          },
-        ),
-      ],
+            onPressed: () {
+              setState(() => _isPublic = !_isPublic);
+            },
+          ),
+        ],
+      ),
     );
   }
 
@@ -231,15 +420,18 @@ class _AddPostScreenState extends State<AddPostScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          'Add Media',
-          style: TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.bold,
-            color: Colors.black87,
+        Padding(
+          padding: const EdgeInsets.only(left: 4, bottom: 8),
+          child: Text(
+            'MEDIA',
+            style: TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+              color: Colors.grey[600],
+              letterSpacing: 0.5,
+            ),
           ),
         ),
-        const SizedBox(height: 8),
         if (_mediaFiles.isEmpty)
           GestureDetector(
             onTap: _pickMedia,
@@ -248,29 +440,43 @@ class _AddPostScreenState extends State<AddPostScreen> {
               width: double.infinity,
               decoration: BoxDecoration(
                 color: Colors.white,
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(
-                  color: Colors.grey[300]!,
-                  width: 1.5,
-                  style: BorderStyle.solid,
-                ),
+                borderRadius: BorderRadius.circular(14),
+                border: Border.all(color: Colors.grey[200]!, width: 1.5),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.03),
+                    blurRadius: 10,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
               ),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(
-                    Icons.add_photo_alternate_outlined,
-                    size: 40,
-                    color: Colors.grey[400],
+                  Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: Colors.blue[50],
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(
+                      Icons.add_photo_alternate_outlined,
+                      size: 32,
+                      color: Colors.blue[700],
+                    ),
                   ),
-                  const SizedBox(height: 8),
+                  const SizedBox(height: 12),
                   Text(
-                    'Tap to add photos/videos',
-                    style: TextStyle(color: Colors.grey[600], fontSize: 14),
+                    'Add photos or videos',
+                    style: TextStyle(
+                      color: Colors.grey[700],
+                      fontSize: 14,
+                      fontWeight: FontWeight.w500,
+                    ),
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    'Up to 10 files',
+                    'JPEG, PNG, MP4 up to 10MB',
                     style: TextStyle(color: Colors.grey[500], fontSize: 12),
                   ),
                 ],
@@ -287,17 +493,19 @@ class _AddPostScreenState extends State<AddPostScreen> {
                   itemCount: _mediaFiles.length,
                   itemBuilder: (context, index) {
                     return Padding(
-                      padding: const EdgeInsets.only(right: 12),
+                      padding: EdgeInsets.only(
+                        right: index == _mediaFiles.length - 1 ? 0 : 12,
+                      ),
                       child: ClipRRect(
-                        borderRadius: BorderRadius.circular(10),
+                        borderRadius: BorderRadius.circular(12),
                         child: Stack(
                           children: [
                             Container(
                               width: 180,
                               height: 180,
                               decoration: BoxDecoration(
-                                color: Colors.white,
-                                borderRadius: BorderRadius.circular(10),
+                                color: Colors.grey[100],
+                                borderRadius: BorderRadius.circular(12),
                               ),
                               child: Image.file(
                                 File(_mediaFiles[index].path),
@@ -312,7 +520,7 @@ class _AddPostScreenState extends State<AddPostScreen> {
                                 child: Container(
                                   padding: const EdgeInsets.all(4),
                                   decoration: BoxDecoration(
-                                    color: Colors.black54,
+                                    color: Colors.black.withOpacity(0.6),
                                     shape: BoxShape.circle,
                                   ),
                                   child: const Icon(
@@ -333,12 +541,19 @@ class _AddPostScreenState extends State<AddPostScreen> {
               const SizedBox(height: 12),
               OutlinedButton.icon(
                 icon: const Icon(Icons.add, size: 18),
-                label: const Text('Add More'),
+                label: const Text(
+                  'Add More',
+                  style: TextStyle(fontWeight: FontWeight.w500),
+                ),
                 style: OutlinedButton.styleFrom(
                   foregroundColor: Colors.blue,
                   side: const BorderSide(color: Colors.blue),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(20),
+                  ),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 10,
                   ),
                 ),
                 onPressed: _pickMedia,
@@ -356,22 +571,34 @@ class _AddPostScreenState extends State<AddPostScreen> {
         // Title
         TextFormField(
           controller: _titleController,
-          style: const TextStyle(fontSize: 18),
+          style: const TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.w500,
+            height: 1.4,
+          ),
           decoration: InputDecoration(
-            labelText: 'Title',
-            labelStyle: TextStyle(color: Colors.grey[600]),
-            floatingLabelBehavior: FloatingLabelBehavior.always,
+            labelText: 'Post title',
+            labelStyle: TextStyle(color: Colors.grey[600], fontSize: 14),
+            floatingLabelBehavior: FloatingLabelBehavior.auto,
             border: InputBorder.none,
             filled: true,
             fillColor: Colors.white,
-            contentPadding: const EdgeInsets.all(16),
+            contentPadding: const EdgeInsets.all(18),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: Colors.grey[300]!),
+              borderSide: BorderSide(color: Colors.grey[200]!),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
               borderSide: const BorderSide(color: Colors.blue, width: 1.5),
+            ),
+            errorBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: const BorderSide(color: Colors.red),
+            ),
+            focusedErrorBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: const BorderSide(color: Colors.red, width: 1.5),
             ),
           ),
           validator: (value) {
@@ -387,19 +614,19 @@ class _AddPostScreenState extends State<AddPostScreen> {
         TextFormField(
           controller: _descriptionController,
           maxLines: 5,
-          style: const TextStyle(fontSize: 15),
+          style: const TextStyle(fontSize: 15, height: 1.5),
           decoration: InputDecoration(
             labelText: 'What would you like to share?',
-            labelStyle: TextStyle(color: Colors.grey[600]),
+            labelStyle: TextStyle(color: Colors.grey[600], fontSize: 14),
             alignLabelWithHint: true,
-            floatingLabelBehavior: FloatingLabelBehavior.never,
+            floatingLabelBehavior: FloatingLabelBehavior.auto,
             border: InputBorder.none,
             filled: true,
             fillColor: Colors.white,
-            contentPadding: const EdgeInsets.all(16),
+            contentPadding: const EdgeInsets.all(18),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: Colors.grey[300]!),
+              borderSide: BorderSide(color: Colors.grey[200]!),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
@@ -407,68 +634,32 @@ class _AddPostScreenState extends State<AddPostScreen> {
             ),
           ),
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: 20),
 
         // Categories
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
-              'Categories',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-                color: Colors.black87,
+            Padding(
+              padding: const EdgeInsets.only(left: 4, bottom: 8),
+              child: Text(
+                'CATEGORY',
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.grey[600],
+                  letterSpacing: 0.5,
+                ),
               ),
             ),
-            const SizedBox(height: 8),
-            SizedBox(
-              height: 50,
-              child: ListView.builder(
-                scrollDirection: Axis.horizontal,
-                itemCount: categoryList.length,
-                itemBuilder: (context, index) {
-                  final category = categoryList[index];
-                  final categoryItem = category.lists.isNotEmpty
-                      ? category.lists.first
-                      : CategoryItem(emoji: '', label: 'Uncategorized');
-                  return Padding(
-                    padding: const EdgeInsets.only(right: 8),
-                    child: ChoiceChip(
-                      label: Text(
-                        categoryItem.label.isNotEmpty
-                            ? '${categoryItem.emoji} ${categoryItem.label}'
-                            : category.lists.first.label,
-                        style: TextStyle(
-                          color: _selectedCategory == categoryItem.label
-                              ? Colors.white
-                              : Colors.black87,
-                        ),
-                      ),
-                      selected: _selectedCategory == categoryItem.label,
-                      onSelected: (selected) {
-                        setState(() {
-                          _selectedCategory = selected
-                              ? categoryItem.label
-                              : null;
-                        });
-                      },
-                      backgroundColor: Colors.white,
-                      selectedColor: categoryItem.label.isNotEmpty
-                          ? Colors.blue
-                          : Colors.grey[300],
-                      side: BorderSide(color: Colors.grey[300]!, width: 1),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 8,
-                      ),
-                    ),
-                  );
-                },
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: Colors.grey[200]!),
               ),
+              child: _buildCategoryChips(),
             ),
           ],
         ),
@@ -480,107 +671,93 @@ class _AddPostScreenState extends State<AddPostScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Location
-        _buildSettingTile(
-          icon: Icons.location_on_outlined,
-          title: 'Add Location',
-          subtitle: _locationController.text.isEmpty
-              ? 'Not specified'
-              : _locationController.text,
-          onTap: () {
-            // Implement location picker
-            showDialog(
-              context: context,
-              builder: (context) => AlertDialog(
-                title: const Text('Add Location'),
-                content: TextFormField(
-                  controller: _locationController,
-                  decoration: const InputDecoration(
-                    hintText: 'Enter location',
-                    border: OutlineInputBorder(),
-                  ),
-                ),
-                actions: [
-                  TextButton(
-                    onPressed: () => Navigator.pop(context),
-                    child: const Text('Cancel'),
-                  ),
-                  TextButton(
-                    onPressed: () {
-                      setState(() {});
-                      Navigator.pop(context);
-                    },
-                    child: const Text('Save'),
-                  ),
-                ],
-              ),
-            );
-          },
+        Padding(
+          padding: const EdgeInsets.only(left: 4, bottom: 8),
+          child: Text(
+            'POST SETTINGS',
+            style: TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+              color: Colors.grey[600],
+              letterSpacing: 0.5,
+            ),
+          ),
         ),
-        const Divider(height: 1),
-
-        // Tags
-        _buildSettingTile(
-          icon: Icons.tag_outlined,
-          title: 'Add Tags',
-          subtitle: _tags.isEmpty ? 'Not specified' : _tags.join(', '),
-          onTap: () {
-            showDialog(
-              context: context,
-              builder: (context) => AlertDialog(
-                title: const Text('Add Tags'),
-                content: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    TextFormField(
-                      controller: _tagsController,
-                      decoration: InputDecoration(
-                        hintText: 'Enter tags separated by commas',
-                        border: const OutlineInputBorder(),
-                        suffixIcon: IconButton(
-                          icon: const Icon(Icons.add),
-                          onPressed: _addTag,
-                        ),
+        Container(
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: Colors.grey[200]!),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.03),
+                blurRadius: 8,
+                offset: const Offset(0, 4),
+              ),
+            ],
+          ),
+          child: Column(
+            children: [
+              // Location
+              _buildSettingTile(
+                icon: Icons.location_on_outlined,
+                title: 'Add Location',
+                subtitle: _locationController.text.isEmpty
+                    ? 'Not specified'
+                    : _locationController.text,
+                onTap: () {
+                  showModalBottomSheet(
+                    context: context,
+                    shape: const RoundedRectangleBorder(
+                      borderRadius: BorderRadius.vertical(
+                        top: Radius.circular(20),
                       ),
-                      onFieldSubmitted: (value) => _addTag(),
                     ),
-                    if (_tags.isNotEmpty) ...[
-                      const SizedBox(height: 16),
-                      Wrap(
-                        spacing: 8,
-                        runSpacing: 8,
-                        children: _tags
-                            .map(
-                              (tag) => Chip(
-                                label: Text(tag),
-                                onDeleted: () => _removeTag(tag),
-                              ),
-                            )
-                            .toList(),
-                      ),
-                    ],
-                  ],
-                ),
-                actions: [
-                  TextButton(
-                    onPressed: () => Navigator.pop(context),
-                    child: const Text('Done'),
-                  ),
-                ],
+                    builder: (context) => LocationPickerSheet(
+                      controller: _locationController,
+                      onSave: () => setState(() {}),
+                    ),
+                  );
+                },
               ),
-            );
-          },
-        ),
-        const Divider(height: 1),
+              const Divider(height: 1, indent: 16, endIndent: 16),
 
-        // Schedule
-        _buildSettingTile(
-          icon: Icons.schedule_outlined,
-          title: 'Schedule Post',
-          subtitle: _scheduledDate == null
-              ? 'Post immediately'
-              : 'Schedule for ${_scheduledDate!.toString()}',
-          onTap: _selectScheduleDate,
+              // Tags
+              _buildSettingTile(
+                icon: Icons.tag_outlined,
+                title: 'Add Tags',
+                subtitle: _tags.isEmpty ? 'Not specified' : _tags.join(', '),
+                onTap: () {
+                  showModalBottomSheet(
+                    context: context,
+                    shape: const RoundedRectangleBorder(
+                      borderRadius: BorderRadius.vertical(
+                        top: Radius.circular(20),
+                      ),
+                    ),
+                    isScrollControlled: true,
+                    builder: (context) => TagsEditorSheet(
+                      tags: _tags,
+                      controller: _tagsController,
+                      onAdd: _addTag,
+                      onRemove: _removeTag,
+                    ),
+                  );
+                },
+              ),
+              const Divider(height: 1, indent: 16, endIndent: 16),
+
+              // Schedule
+              _buildSettingTile(
+                icon: Icons.schedule_outlined,
+                title: 'Schedule Post',
+                subtitle: _scheduledDate == null
+                    ? 'Post immediately'
+                    : 'Schedule for ${_scheduledDate!.toString()}',
+                onTap: _selectScheduleDate,
+              ),
+            ],
+          ),
         ),
       ],
     );
@@ -593,17 +770,29 @@ class _AddPostScreenState extends State<AddPostScreen> {
     required VoidCallback onTap,
   }) {
     return ListTile(
-      contentPadding: EdgeInsets.zero,
-      leading: Icon(icon, color: Colors.grey[700]),
-      title: Text(title, style: const TextStyle(fontWeight: FontWeight.w500)),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      leading: Container(
+        width: 36,
+        height: 36,
+        decoration: BoxDecoration(
+          color: Colors.grey[100],
+          shape: BoxShape.circle,
+        ),
+        child: Icon(icon, size: 20, color: Colors.grey[700]),
+      ),
+      title: Text(
+        title,
+        style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 15),
+      ),
       subtitle: Text(
         subtitle,
         style: TextStyle(color: Colors.grey[600], fontSize: 13),
         maxLines: 1,
         overflow: TextOverflow.ellipsis,
       ),
-      trailing: const Icon(Icons.chevron_right, color: Colors.grey),
+      trailing: const Icon(Icons.chevron_right, size: 20, color: Colors.grey),
       onTap: onTap,
+      minVerticalPadding: 0,
     );
   }
 
@@ -619,12 +808,19 @@ class _AddPostScreenState extends State<AddPostScreen> {
             borderRadius: BorderRadius.circular(12),
           ),
           elevation: 0,
+          shadowColor: Colors.transparent,
         ),
-        onPressed: _submitPost,
-        child: const Text(
-          'Publish Post',
-          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-        ),
+        onPressed: _isLoading ? null : _submitPost,
+        child: _isLoading
+            ? CircularProgressIndicator()
+            : Text(
+                'Publish Post',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  letterSpacing: 0.5,
+                ),
+              ),
       ),
     );
   }

@@ -15,16 +15,21 @@ class CategoryModel {
 }
 
 class CategoryItem {
+  final String id;
   final String emoji;
   final String label;
 
-  CategoryItem({required this.emoji, required this.label});
+  CategoryItem({required this.id, required this.emoji, required this.label});
 
   factory CategoryItem.fromMap(Map<String, dynamic> map) {
-    return CategoryItem(emoji: map['emoji'] ?? '', label: map['label'] ?? '');
+    return CategoryItem(
+      id: map['id'],
+      emoji: map['emoji'] ?? '',
+      label: map['label'] ?? '',
+    );
   }
 
   Map<String, dynamic> toMap() {
-    return {'emoji': emoji, 'label': label};
+    return {'id': id, 'emoji': emoji, 'label': label};
   }
 }
