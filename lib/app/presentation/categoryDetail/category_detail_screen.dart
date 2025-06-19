@@ -1,11 +1,17 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:get/get.dart';
 import 'package:new_flutter_app/app/core/constants/constdata.dart';
 import 'package:new_flutter_app/app/core/utils/app_styles.dart';
+import 'package:new_flutter_app/app/global/controller/post_coontroller.dart';
+import 'package:new_flutter_app/app/global/controller/story_controller.dart';
+import 'package:new_flutter_app/app/presentation/categoryDetail/widgets/popular_posts.dart';
+import 'package:new_flutter_app/app/presentation/categoryDetail/widgets/top_story_card.dart';
+import 'package:new_flutter_app/app/presentation/storyDetails/story_details_screen.dart';
 import 'package:shimmer/shimmer.dart';
 
-class CategoryDetailScreen extends StatelessWidget {
+class CategoryDetailScreen extends StatefulWidget {
   final String categoryName;
   final String categoryEmoji;
   final Color categoryColor;
@@ -17,6 +23,11 @@ class CategoryDetailScreen extends StatelessWidget {
     super.key,
   });
 
+  @override
+  State<CategoryDetailScreen> createState() => _CategoryDetailScreenState();
+}
+
+class _CategoryDetailScreenState extends State<CategoryDetailScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -32,7 +43,7 @@ class CategoryDetailScreen extends StatelessWidget {
             stretch: true,
             flexibleSpace: FlexibleSpaceBar(
               title: Text(
-                categoryName,
+                widget.categoryName,
                 style: appStyle(22, Colors.white, FontWeight.bold).copyWith(
                   shadows: [
                     Shadow(
@@ -48,9 +59,9 @@ class CategoryDetailScreen extends StatelessWidget {
                 children: [
                   // Blurred Background Image
                   CachedNetworkImage(
-                    imageUrl: _getCategoryBackground(categoryName),
+                    imageUrl: _getCategoryBackground(widget.categoryName),
                     fit: BoxFit.cover,
-                    color: categoryColor.withOpacity(0.3),
+                    color: widget.categoryColor.withOpacity(0.3),
                     colorBlendMode: BlendMode.overlay,
                   ),
                   // Gradient Overlay
@@ -61,7 +72,7 @@ class CategoryDetailScreen extends StatelessWidget {
                         end: Alignment.bottomCenter,
                         colors: [
                           Colors.transparent,
-                          categoryColor.withOpacity(0.7),
+                          widget.categoryColor.withOpacity(0.7),
                         ],
                       ),
                     ),
@@ -69,9 +80,9 @@ class CategoryDetailScreen extends StatelessWidget {
                   // Category Emoji
                   Center(
                     child: Hero(
-                      tag: 'category-$categoryName',
+                      tag: 'category-${widget.categoryName}',
                       child: Text(
-                        categoryEmoji,
+                        widget.categoryEmoji,
                         style: TextStyle(fontSize: 100.sp),
                       ),
                     ),
@@ -91,7 +102,7 @@ class CategoryDetailScreen extends StatelessWidget {
                   SizedBox(height: 20.h),
                   // Category Description
                   Text(
-                    _getCategoryDescription(categoryName),
+                    _getCategoryDescription(widget.categoryName),
                     style: appStyle(
                       16,
                       kDark.withOpacity(0.8),
@@ -120,26 +131,68 @@ class CategoryDetailScreen extends StatelessWidget {
               ),
             ),
           ),
+          // Top stories Grid
+          GetBuilder<StoryController>(
+            init: StoryController(),
+            builder: (storyController) {
+              if (storyController.isLoading) {
+                return SliverToBoxAdapter(
+                  child: Container(
+                    padding: EdgeInsets.symmetric(vertical: 20.h),
+                    margin: EdgeInsets.symmetric(horizontal: 20.w),
+                    child: Center(
+                      child: Shimmer.fromColors(
+                        baseColor: Colors.grey.shade300,
+                        highlightColor: Colors.grey.shade100,
+                        child: Container(
+                          width: double.infinity,
+                          height: 200.h,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                  ),
+                );
+              }
+              final stories = storyController.stories
+                  .where(
+                    (story) => story.category.contains(widget.categoryName),
+                  )
+                  .toList();
 
-          // Top Destinations Grid
-          SliverPadding(
-            padding: EdgeInsets.symmetric(horizontal: 20.w),
-            sliver: SliverGrid(
-              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2,
-                mainAxisSpacing: 15.h,
-                crossAxisSpacing: 15.w,
-                childAspectRatio: 0.75,
-              ),
-              delegate: SliverChildBuilderDelegate(
-                (context, index) => _TopStoryCard(
-                  index: index,
-                  category: categoryName,
-                  color: categoryColor,
+              if (stories.isEmpty) {
+                return SliverToBoxAdapter(
+                  child: Padding(
+                    padding: EdgeInsets.all(20.w),
+                    child: Text(
+                      'No stories found for ${widget.categoryName}',
+                      style: appStyle(14, kGray, FontWeight.w500),
+                    ),
+                  ),
+                );
+              }
+
+              return SliverPadding(
+                padding: EdgeInsets.symmetric(horizontal: 20.w),
+                sliver: SliverGrid(
+                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 2,
+                    mainAxisSpacing: 15.h,
+                    crossAxisSpacing: 15.w,
+                    childAspectRatio: 0.75,
+                  ),
+                  delegate: SliverChildBuilderDelegate((context, index) {
+                    final story = stories[index];
+                    return TopStoryCard(
+                      index: index,
+                      category: widget.categoryName,
+                      color: widget.categoryColor,
+                      story: story,
+                    );
+                  }, childCount: stories.length),
                 ),
-                childCount: 4,
-              ),
-            ),
+              );
+            },
           ),
 
           // Popular Experiences Section
@@ -149,22 +202,74 @@ class CategoryDetailScreen extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    'Popular Posts',
-                    style: appStyle(20, kDark, FontWeight.bold),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'Popular Posts',
+                        style: appStyle(20, kDark, FontWeight.bold),
+                      ),
+                      TextButton(
+                        onPressed: () {},
+                        child: Text(
+                          'View all',
+                          style: appStyle(14, kSecondary, FontWeight.w600),
+                        ),
+                      ),
+                    ],
                   ),
                   SizedBox(height: 15.h),
-                  SizedBox(
-                    height: 220.h,
-                    child: ListView.builder(
-                      scrollDirection: Axis.horizontal,
-                      itemCount: 3,
-                      itemBuilder: (context, index) => _PopularPostCard(
-                        index: index,
-                        category: categoryName,
-                        color: categoryColor,
-                      ),
-                    ),
+                  GetBuilder<PostController>(
+                    init: PostController(),
+                    builder: (postController) {
+                      if (postController.isLoading) {
+                        return Container(
+                          padding: EdgeInsets.symmetric(vertical: 20.h),
+                          margin: EdgeInsets.symmetric(horizontal: 20.w),
+                          child: Center(
+                            child: Shimmer.fromColors(
+                              baseColor: Colors.grey.shade300,
+                              highlightColor: Colors.grey.shade100,
+                              child: Container(
+                                width: double.infinity,
+                                height: 200.h,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ),
+                        );
+                      }
+                      final posts = postController.posts
+                          .where(
+                            (posts) =>
+                                posts.category.contains(widget.categoryName),
+                          )
+                          .toList();
+
+                      if (posts.isEmpty) {
+                        return Padding(
+                          padding: EdgeInsets.all(20.w),
+                          child: Text(
+                            'No Posts found for ${widget.categoryName}',
+                            style: appStyle(14, kGray, FontWeight.w500),
+                          ),
+                        );
+                      }
+
+                      return SizedBox(
+                        height: 220.h,
+                        child: ListView.builder(
+                          scrollDirection: Axis.horizontal,
+                          itemCount: posts.length,
+                          itemBuilder: (context, index) => PopularPostCard(
+                            index: index,
+                            category: widget.categoryName,
+                            color: widget.categoryColor,
+                            posts: posts,
+                          ),
+                        ),
+                      );
+                    },
                   ),
                 ],
               ),
@@ -184,15 +289,15 @@ class CategoryDetailScreen extends StatelessWidget {
                   ),
                   SizedBox(height: 15.h),
                   _TravelTipCard(
-                    tip: _getTravelTip(categoryName, 0),
+                    tip: _getTravelTip(widget.categoryName, 0),
                     icon: Icons.calendar_today,
-                    color: categoryColor,
+                    color: widget.categoryColor,
                   ),
                   SizedBox(height: 10.h),
                   _TravelTipCard(
-                    tip: _getTravelTip(categoryName, 1),
+                    tip: _getTravelTip(widget.categoryName, 1),
                     icon: Icons.attach_money,
-                    color: categoryColor,
+                    color: widget.categoryColor,
                   ),
                 ],
               ),
@@ -287,376 +392,6 @@ class CategoryDetailScreen extends StatelessWidget {
     };
     return tips[category]?[index % 2] ??
         'Plan ahead for the best travel experience.';
-  }
-}
-
-class _TopStoryCard extends StatelessWidget {
-  final int index;
-  final String category;
-  final Color color;
-
-  const _TopStoryCard({
-    required this.index,
-    required this.category,
-    required this.color,
-    Key? key,
-  }) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    final places = {
-      'Mountains': [
-        {
-          'name': 'Everest Base Camp',
-          'location': 'Nepal',
-          'image':
-              'https://images.unsplash.com/photo-1580655653885-65763b2597d0',
-          'price': '\$1,200',
-        },
-        {
-          'name': 'Swiss Alps',
-          'location': 'Switzerland',
-          'image':
-              'https://images.unsplash.com/photo-1476231682828-37e571bc172f',
-          'price': '\$2,400',
-        },
-        {
-          'name': 'Rocky Mountains',
-          'location': 'Canada',
-          'image':
-              'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b',
-          'price': '\$1,800',
-        },
-        {
-          'name': 'Andes Trek',
-          'location': 'Peru',
-          'image':
-              'https://images.unsplash.com/photo-1452421822248-d4c2b47f0c81',
-          'price': '\$1,500',
-        },
-      ],
-      'Beaches': [
-        {
-          'name': 'Maldives',
-          'location': 'Indian Ocean',
-          'image':
-              'https://images.unsplash.com/photo-1507525428034-b723cf961d3e',
-          'price': '\$3,200',
-        },
-        {
-          'name': 'Bora Bora',
-          'location': 'French Polynesia',
-          'image': 'https://images.unsplash.com/photo-1544551763-46a013bb70d5',
-          'price': '\$4,500',
-        },
-        {
-          'name': 'Whitehaven',
-          'location': 'Australia',
-          'image':
-              'https://images.unsplash.com/photo-1505228395891-9a51e7e86bf6',
-          'price': '\$2,800',
-        },
-        {
-          'name': 'Navagio',
-          'location': 'Greece',
-          'image':
-              'https://images.unsplash.com/photo-1507699622108-4be3abd695ad',
-          'price': '\$2,100',
-        },
-      ],
-    };
-
-    final categoryPlaces = places[category] ?? places['Mountains']!;
-    final place = categoryPlaces[index % categoryPlaces.length];
-
-    return GestureDetector(
-      onTap: () {
-        // Navigate to place detail screen
-      },
-      child: Container(
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(15.r),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.1),
-              blurRadius: 10,
-              spreadRadius: 2,
-              offset: Offset(0, 4),
-            ),
-          ],
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Image with Gradient Overlay
-            ClipRRect(
-              borderRadius: BorderRadius.vertical(top: Radius.circular(15.r)),
-              child: Stack(
-                children: [
-                  CachedNetworkImage(
-                    imageUrl: place['image'] as String,
-                    width: double.infinity,
-                    height: 120.h,
-                    fit: BoxFit.cover,
-                    placeholder: (context, url) => Shimmer.fromColors(
-                      baseColor: Colors.grey.shade300,
-                      highlightColor: Colors.grey.shade100,
-                      child: Container(
-                        color: Colors.white,
-                        width: double.infinity,
-                        height: 120.h,
-                      ),
-                    ),
-                  ),
-                  Container(
-                    height: 120.h,
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.topCenter,
-                        end: Alignment.bottomCenter,
-                        colors: [Colors.transparent, color.withOpacity(0.6)],
-                      ),
-                    ),
-                  ),
-                  // Price Tag
-                  Positioned(
-                    top: 10.h,
-                    right: 10.w,
-                    child: Container(
-                      padding: EdgeInsets.symmetric(
-                        horizontal: 10.w,
-                        vertical: 5.h,
-                      ),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(20.r),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.1),
-                            blurRadius: 5,
-                          ),
-                        ],
-                      ),
-                      child: Text(
-                        place['price'] as String,
-                        style: appStyle(12, color, FontWeight.bold),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            Padding(
-              padding: EdgeInsets.all(12.w),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    place['name'] as String,
-                    style: appStyle(16, kDark, FontWeight.bold),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  SizedBox(height: 5.h),
-                  Row(
-                    children: [
-                      Icon(Icons.location_on, size: 14.sp, color: kGray),
-                      SizedBox(width: 5.w),
-                      Text(
-                        place['location'] as String,
-                        style: appStyle(12, kGray, FontWeight.normal),
-                      ),
-                      Spacer(),
-                      Icon(Icons.star, size: 14.sp, color: Colors.amber),
-                      SizedBox(width: 3.w),
-                      Text('4.5 ', style: appStyle(12, kDark, FontWeight.w500)),
-                    ],
-                  ),
-                  SizedBox(height: 10.h),
-                  LinearProgressIndicator(
-                    value: (4.5 + (index * 0.1)) / 5,
-                    backgroundColor: Colors.grey.shade200,
-                    valueColor: AlwaysStoppedAnimation<Color>(color),
-                    minHeight: 3.h,
-                    borderRadius: BorderRadius.circular(2.r),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _PopularPostCard extends StatelessWidget {
-  final int index;
-  final String category;
-  final Color color;
-
-  const _PopularPostCard({
-    required this.index,
-    required this.category,
-    required this.color,
-    Key? key,
-  }) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    final experiences = {
-      'Mountains': [
-        {
-          'title': 'Sunrise Hike',
-          'description':
-              'Early morning trek to catch breathtaking sunrise views',
-          'image':
-              'https://images.unsplash.com/photo-1501785888041-af3ef285b470',
-          'duration': '4 hours',
-        },
-        {
-          'title': 'Alpine Skiing',
-          'description': 'Guided skiing through pristine mountain slopes',
-          'image':
-              'https://images.unsplash.com/photo-1518604666860-9ed391f76460',
-          'duration': 'Full day',
-        },
-        {
-          'title': 'Mountain Yoga',
-          'description': 'Sunset yoga session with panoramic mountain views',
-          'image': 'https://images.unsplash.com/photo-1544367567-0f2fcb009e0b',
-          'duration': '2 hours',
-        },
-      ],
-      'Beaches': [
-        {
-          'title': 'Snorkeling Tour',
-          'description': 'Explore vibrant coral reefs and marine life',
-          'image':
-              'https://images.unsplash.com/photo-1504470695779-75300268aa0e',
-          'duration': '3 hours',
-        },
-        {
-          'title': 'Sunset Cruise',
-          'description': 'Relaxing boat trip with drinks and ocean views',
-          'image':
-              'https://images.unsplash.com/photo-1506929562872-bb421503ef21',
-          'duration': '2 hours',
-        },
-        {
-          'title': 'Beach BBQ',
-          'description': 'Fresh seafood barbecue right on the sand',
-          'image':
-              'https://images.unsplash.com/photo-1517824806704-9040b037703b',
-          'duration': 'Evening',
-        },
-      ],
-    };
-
-    final categoryExperiences =
-        experiences[category] ?? experiences['Mountains']!;
-    final experience = categoryExperiences[index % categoryExperiences.length];
-
-    return Container(
-      width: 250.w,
-      margin: EdgeInsets.only(right: 15.w),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(15.r),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.1),
-            blurRadius: 10,
-            spreadRadius: 2,
-            offset: Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Experience Image
-          ClipRRect(
-            borderRadius: BorderRadius.vertical(top: Radius.circular(15.r)),
-            child: Stack(
-              children: [
-                CachedNetworkImage(
-                  imageUrl: experience['image'] as String,
-                  width: double.infinity,
-                  height: 100.h,
-                  fit: BoxFit.cover,
-                  placeholder: (context, url) => Shimmer.fromColors(
-                    baseColor: Colors.grey.shade300,
-                    highlightColor: Colors.grey.shade100,
-                    child: Container(
-                      color: Colors.white,
-                      width: double.infinity,
-                      height: 100.h,
-                    ),
-                  ),
-                ),
-                Container(
-                  height: 100.h,
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.topCenter,
-                      end: Alignment.bottomCenter,
-                      colors: [Colors.transparent, color.withOpacity(0.7)],
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          Padding(
-            padding: EdgeInsets.all(12.w),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  experience['title'] as String,
-                  style: appStyle(16, kDark, FontWeight.bold),
-                ),
-                SizedBox(height: 5.h),
-                Text(
-                  experience['description'] as String,
-                  style: appStyle(12, kGray, FontWeight.normal),
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                SizedBox(height: 10.h),
-                Row(
-                  children: [
-                    Icon(Icons.access_time, size: 14.sp, color: color),
-                    SizedBox(width: 5.w),
-                    Text(
-                      experience['duration'] as String,
-                      style: appStyle(12, color, FontWeight.w600),
-                    ),
-                    Spacer(),
-                    Container(
-                      padding: EdgeInsets.symmetric(
-                        horizontal: 10.w,
-                        vertical: 5.h,
-                      ),
-                      decoration: BoxDecoration(
-                        color: color.withOpacity(0.2),
-                        borderRadius: BorderRadius.circular(20.r),
-                      ),
-                      child: Text(
-                        'Book Now',
-                        style: appStyle(10, color, FontWeight.bold),
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
   }
 }
 

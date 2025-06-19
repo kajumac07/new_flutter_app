@@ -48,6 +48,11 @@ dependencies:
   cloud_firestore:
   image_picker:
   firebase_storage:
+  timeago:
+  flutter_rating_bar:
+  readmore:
+  iconsax:
+  syncfusion_flutter_datepicker:
 
 dev_dependencies:
   flutter_test:
