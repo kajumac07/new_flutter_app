@@ -161,6 +161,7 @@ class ExploreScreen extends StatelessWidget {
                       () => CategoryDetailScreen(
                         categoryName: categories[index]['label'] as String,
                         categoryColor: categories[index]['color'] as Color,
+                        categoryEmoji: categories[index]['emoji'] as String,
                       ),
                     );
                   },

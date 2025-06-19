@@ -5,6 +5,7 @@ import 'package:new_flutter_app/app/core/constants/constdata.dart';
 import 'package:new_flutter_app/app/core/utils/app_styles.dart';
 import 'package:new_flutter_app/app/global/widgets/glowing_icon_button.dart';
 import 'package:new_flutter_app/app/presentation/addPost/add_post_screen.dart';
+import 'package:new_flutter_app/app/presentation/addStory/add_story.dart';
 import 'package:new_flutter_app/app/presentation/cloudNotificationScreen/cloud_notification_screen.dart';
 import 'package:new_flutter_app/app/presentation/profile/profile_details_screen.dart';
 
@@ -257,7 +258,49 @@ class CommunityScreen extends StatelessWidget {
         ],
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () => Get.to(() => AddPostScreen()),
+        onPressed: () {
+          showModalBottomSheet(
+            context: Get.context!,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.vertical(top: Radius.circular(20.r)),
+            ),
+            builder: (_) {
+              return Padding(
+                padding: EdgeInsets.all(16.r),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    ListTile(
+                      leading: Icon(Icons.post_add, color: kSecondary),
+                      title: Text(
+                        "Add Post",
+                        style: TextStyle(fontSize: 16.sp),
+                      ),
+                      onTap: () {
+                        Get.back(); // Close the bottom sheet
+                        Get.to(() => AddPostScreen());
+                      },
+                    ),
+                    Divider(),
+                    ListTile(
+                      leading: Icon(Icons.history_edu, color: kSecondary),
+                      title: Text(
+                        "Add Story",
+                        style: TextStyle(fontSize: 16.sp),
+                      ),
+                      onTap: () {
+                        Get.back(); // Close the bottom sheet
+                        Get.to(
+                          () => AddStoryScreen(),
+                        ); // Replace with your AddStoryScreen
+                      },
+                    ),
+                  ],
+                ),
+              );
+            },
+          );
+        },
         backgroundColor: kSecondary,
         elevation: 4,
         shape: RoundedRectangleBorder(

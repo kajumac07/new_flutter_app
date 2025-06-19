@@ -7,6 +7,7 @@ import 'dart:io';
 import 'package:image_picker/image_picker.dart';
 import 'package:new_flutter_app/app/core/constants/constdata.dart';
 import 'package:new_flutter_app/app/core/services/collection_refrence.dart';
+import 'package:new_flutter_app/app/core/services/upload_media_to_db.dart';
 import 'package:new_flutter_app/app/core/utils/toast_msg.dart';
 import 'package:new_flutter_app/app/global/controller/profile_controller.dart';
 import 'package:new_flutter_app/app/global/helper/location_picker_sheet.dart';
@@ -88,34 +89,6 @@ class _AddPostScreenState extends State<AddPostScreen> {
     }
   }
 
-  Future<List<String>> _uploadMediaFiles() async {
-    List<String> downloadUrls = [];
-    final storage = FirebaseStorage.instance;
-
-    for (var mediaFile in _mediaFiles) {
-      try {
-        // Create a unique filename
-        String fileName =
-            'posts/$currentUId/${DateTime.now().millisecondsSinceEpoch}_${mediaFile.name}';
-
-        // Upload the file
-        TaskSnapshot snapshot = await storage
-            .ref(fileName)
-            .putFile(File(mediaFile.path));
-
-        // Get download URL
-        String downloadUrl = await snapshot.ref.getDownloadURL();
-        downloadUrls.add(downloadUrl);
-      } catch (e) {
-        log('Error uploading file: $e');
-        // You might want to continue with other files or abort
-        rethrow;
-      }
-    }
-
-    return downloadUrls;
-  }
-
   void _removeMedia(int index) {
     setState(() {
       _mediaFiles.removeAt(index);
@@ -171,7 +144,7 @@ class _AddPostScreenState extends State<AddPostScreen> {
       // 1. Upload media files to storage
       List<String> mediaUrls = [];
       if (_mediaFiles.isNotEmpty) {
-        mediaUrls = await _uploadMediaFiles();
+        mediaUrls = await uploadMediaFiles("posts", _mediaFiles);
       }
 
       // Create a batch write
@@ -307,8 +280,8 @@ class _AddPostScreenState extends State<AddPostScreen> {
         ),
         centerTitle: true,
         elevation: 0,
-        backgroundColor: Colors.white,
-        foregroundColor: Colors.black87,
+        backgroundColor: kSecondary,
+        foregroundColor: kWhite,
         actions: [
           IconButton(
             icon: const Icon(Icons.close, size: 24),
@@ -801,7 +774,7 @@ class _AddPostScreenState extends State<AddPostScreen> {
       width: double.infinity,
       child: ElevatedButton(
         style: ElevatedButton.styleFrom(
-          backgroundColor: Colors.blue,
+          backgroundColor: kSecondary,
           foregroundColor: Colors.white,
           padding: const EdgeInsets.symmetric(vertical: 16),
           shape: RoundedRectangleBorder(

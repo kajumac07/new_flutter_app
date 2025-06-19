@@ -61,6 +61,7 @@ class _HolographicCategory extends StatelessWidget {
             Get.to(
               () => CategoryDetailScreen(
                 categoryName: label,
+                categoryEmoji: emoji,
                 categoryColor: kPrimary,
               ),
             );

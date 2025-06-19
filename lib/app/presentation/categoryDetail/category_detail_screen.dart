@@ -7,13 +7,15 @@ import 'package:shimmer/shimmer.dart';
 
 class CategoryDetailScreen extends StatelessWidget {
   final String categoryName;
+  final String categoryEmoji;
   final Color categoryColor;
 
   const CategoryDetailScreen({
     required this.categoryName,
+    required this.categoryEmoji,
     required this.categoryColor,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -69,7 +71,7 @@ class CategoryDetailScreen extends StatelessWidget {
                     child: Hero(
                       tag: 'category-$categoryName',
                       child: Text(
-                        _getCategoryEmoji(categoryName),
+                        categoryEmoji,
                         style: TextStyle(fontSize: 100.sp),
                       ),
                     ),
@@ -102,7 +104,7 @@ class CategoryDetailScreen extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        'Top Destinations',
+                        'Top Stories',
                         style: appStyle(20, kDark, FontWeight.bold),
                       ),
                       TextButton(
@@ -130,7 +132,7 @@ class CategoryDetailScreen extends StatelessWidget {
                 childAspectRatio: 0.75,
               ),
               delegate: SliverChildBuilderDelegate(
-                (context, index) => _CategoryPlaceCard(
+                (context, index) => _TopStoryCard(
                   index: index,
                   category: categoryName,
                   color: categoryColor,
@@ -148,7 +150,7 @@ class CategoryDetailScreen extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Popular Experiences',
+                    'Popular Posts',
                     style: appStyle(20, kDark, FontWeight.bold),
                   ),
                   SizedBox(height: 15.h),
@@ -157,7 +159,7 @@ class CategoryDetailScreen extends StatelessWidget {
                     child: ListView.builder(
                       scrollDirection: Axis.horizontal,
                       itemCount: 3,
-                      itemBuilder: (context, index) => _ExperienceCard(
+                      itemBuilder: (context, index) => _PopularPostCard(
                         index: index,
                         category: categoryName,
                         color: categoryColor,
@@ -200,29 +202,6 @@ class CategoryDetailScreen extends StatelessWidget {
         ],
       ),
     );
-  }
-
-  String _getCategoryEmoji(String category) {
-    switch (category) {
-      case 'Mountains':
-        return '⛰️';
-      case 'Beaches':
-        return '🏖️';
-      case 'Heritage':
-        return '🏛️';
-      case 'Camping':
-        return '🏕️';
-      case 'Food':
-        return '🍜';
-      case 'Spiritual':
-        return '🛕';
-      case 'Shopping':
-        return '🛒';
-      case 'Culture':
-        return '🎭';
-      default:
-        return '✈️';
-    }
   }
 
   String _getCategoryBackground(String category) {
@@ -311,12 +290,12 @@ class CategoryDetailScreen extends StatelessWidget {
   }
 }
 
-class _CategoryPlaceCard extends StatelessWidget {
+class _TopStoryCard extends StatelessWidget {
   final int index;
   final String category;
   final Color color;
 
-  const _CategoryPlaceCard({
+  const _TopStoryCard({
     required this.index,
     required this.category,
     required this.color,
@@ -512,12 +491,12 @@ class _CategoryPlaceCard extends StatelessWidget {
   }
 }
 
-class _ExperienceCard extends StatelessWidget {
+class _PopularPostCard extends StatelessWidget {
   final int index;
   final String category;
   final Color color;
 
-  const _ExperienceCard({
+  const _PopularPostCard({
     required this.index,
     required this.category,
     required this.color,
