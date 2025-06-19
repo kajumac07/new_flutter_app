@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'package:new_flutter_app/app/core/constants/constdata.dart';
 import 'package:new_flutter_app/app/core/utils/app_styles.dart';
 import 'package:new_flutter_app/app/global/widgets/glowing_icon_button.dart';
+import 'package:new_flutter_app/app/presentation/addPost/add_post_screen.dart';
 import 'package:new_flutter_app/app/presentation/cloudNotificationScreen/cloud_notification_screen.dart';
 import 'package:new_flutter_app/app/presentation/profile/profile_details_screen.dart';
 
@@ -256,13 +257,13 @@ class CommunityScreen extends StatelessWidget {
         ],
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () {},
+        onPressed: () => Get.to(() => AddPostScreen()),
         backgroundColor: kSecondary,
-        child: Icon(Icons.edit, color: kWhite, size: 24.sp),
         elevation: 4,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(50.r),
         ),
+        child: Icon(Icons.edit, color: kWhite, size: 24.sp),
       ),
     );
   }
