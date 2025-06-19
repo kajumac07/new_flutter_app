@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:new_flutter_app/app/core/constants/constdata.dart';
+import 'package:new_flutter_app/app/core/services/collection_refrence.dart';
 import 'package:new_flutter_app/app/core/utils/app_styles.dart';
 import 'package:new_flutter_app/app/presentation/storyDetails/story_details_screen.dart';
 import 'package:shimmer/shimmer.dart';
@@ -30,6 +31,7 @@ class TopStoryCard extends StatelessWidget {
           () => StoryDetailsScreen(
             storyId: story.sId,
             publishedUserId: story.uid,
+            currentUserId: currentUId,
             storyTitle: story.title,
           ),
         );
