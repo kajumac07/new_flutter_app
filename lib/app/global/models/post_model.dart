@@ -13,7 +13,7 @@ class PostModel {
   final List<String> tags;
   final Timestamp? createdAt;
   final List<String> likes;
-  final List<String> comments;
+  final List<Map<String, dynamic>> comments; // Changed to Map
   final DateTime scheduledAt;
   final String status;
 
@@ -30,7 +30,7 @@ class PostModel {
     required this.tags,
     this.createdAt,
     required this.likes,
-    required this.comments,
+    required this.comments, // Changed to Map
     required this.scheduledAt,
     required this.status,
   });
@@ -49,7 +49,9 @@ class PostModel {
       tags: List<String>.from(map['tags'] ?? []),
       createdAt: map['created_at'],
       likes: List<String>.from(map['likes'] ?? []),
-      comments: List<String>.from(map['comments'] ?? []),
+      comments: List<Map<String, dynamic>>.from(
+        map['comments'] ?? [],
+      ), // Changed to Map
       scheduledAt:
           (map['scheduled_at'] as Timestamp?)?.toDate() ?? DateTime.now(),
       status: map['status'] ?? 'published',
@@ -70,7 +72,7 @@ class PostModel {
       'tags': tags,
       'created_at': createdAt ?? FieldValue.serverTimestamp(),
       'likes': likes,
-      'comments': comments,
+      'comments': comments, // Changed to Map
       'scheduled_at': Timestamp.fromDate(scheduledAt),
       'status': status,
     };

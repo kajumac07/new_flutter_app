@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:get/get.dart';
 import 'package:new_flutter_app/app/core/constants/constdata.dart';
@@ -29,6 +31,7 @@ class StoryController extends GetxController {
     } catch (e) {
       showToastMessage("Error", "Error fetching stories: $e", kRed);
       isLoading = false;
+      log(e.toString());
       update();
     } finally {
       isLoading = false;

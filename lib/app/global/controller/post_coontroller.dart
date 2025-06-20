@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:get/get.dart';
 import 'package:new_flutter_app/app/core/constants/constdata.dart';
@@ -35,6 +37,7 @@ class PostController extends GetxController {
     } catch (e) {
       isLoading = false;
       update();
+      log(e.toString());
       showToastMessage("Error", "Failed to fetch posts: $e", kRed);
     }
   }
