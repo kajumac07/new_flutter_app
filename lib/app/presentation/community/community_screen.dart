@@ -3,6 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:new_flutter_app/app/core/constants/constdata.dart';
 import 'package:new_flutter_app/app/core/utils/app_styles.dart';
+import 'package:new_flutter_app/app/global/widgets/custom_container.dart';
 import 'package:new_flutter_app/app/global/widgets/glowing_icon_button.dart';
 import 'package:new_flutter_app/app/presentation/addPost/add_post_screen.dart';
 import 'package:new_flutter_app/app/presentation/addStory/add_story.dart';
@@ -15,8 +16,9 @@ class CommunityScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: kLightWhite,
+      backgroundColor: Colors.transparent,
       appBar: AppBar(
+        backgroundColor: kCardColor,
         elevation: 0,
         title: Text(
           'Community',
@@ -30,16 +32,8 @@ class CommunityScreen extends StatelessWidget {
             ],
           ),
         ),
-        centerTitle: true,
-        flexibleSpace: Container(
-          decoration: BoxDecoration(
-            // gradient: LinearGradient(
-            //   colors: [kLightWhite, Colors.white.withOpacity(0.95)],
-            //   begin: Alignment.topCenter,
-            //   end: Alignment.bottomCenter,
-            // ),
-          ),
-        ),
+
+        // centerTitle: true,
         actions: [
           GlowingIconButton(
             icon: Icons.notifications,
@@ -54,212 +48,217 @@ class CommunityScreen extends StatelessWidget {
           SizedBox(width: 15.w),
         ],
       ),
-      body: CustomScrollView(
-        physics: const BouncingScrollPhysics(),
-        slivers: [
-          // Community Header with Stats
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: EdgeInsets.symmetric(horizontal: 25.w, vertical: 20.h),
-              child: Column(
-                children: [
-                  // Animated Stats Cards
-                  Row(
-                    children: [
-                      Expanded(
-                        child: _AnimatedStatCard(
-                          value: '1.2K',
-                          label: 'Members',
-                          icon: Icons.people_alt_outlined,
-                          color: kSecondary,
-                        ),
-                      ),
-                      SizedBox(width: 15.w),
-                      Expanded(
-                        child: _AnimatedStatCard(
-                          value: '356',
-                          label: 'Online Now',
-                          icon: Icons.online_prediction,
-                          color: Colors.green,
-                        ),
-                      ),
-                    ],
-                  ),
-                  SizedBox(height: 20.h),
-                  // Community Description
-                  Text(
-                    'Connect with fellow travelers, share experiences, and get inspired for your next adventure!',
-                    style: appStyle(
-                      16,
-                      kDark.withOpacity(0.8),
-                      FontWeight.w500,
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                ],
-              ),
-            ),
-          ),
-
-          // Featured Post with Parallax
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: EdgeInsets.symmetric(horizontal: 20.w),
-              child: _FeaturedPostCard(),
-            ),
-          ),
-
-          // Trending Topics
-          SliverPadding(
-            padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 25.h),
-            sliver: SliverToBoxAdapter(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        'Trending Topics',
-                        style: appStyle(20, kDark, FontWeight.bold).copyWith(
-                          shadows: [
-                            Shadow(
-                              color: kSecondary.withOpacity(0.1),
-                              blurRadius: 4,
-                              offset: Offset(0, 2),
-                            ),
-                          ],
-                        ),
-                      ),
-                      TextButton(
-                        onPressed: () {},
-                        child: Text(
-                          'See All',
-                          style: appStyle(14, kSecondary, FontWeight.w600),
-                        ),
-                      ),
-                    ],
-                  ),
-                  SizedBox(height: 12.h),
-                  SizedBox(
-                    height: 150.h,
-                    child: ListView(
-                      scrollDirection: Axis.horizontal,
-                      physics: const BouncingScrollPhysics(),
+      body: CustomGradientContainer(
+        child: CustomScrollView(
+          physics: const BouncingScrollPhysics(),
+          slivers: [
+            // Community Header with Stats
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: EdgeInsets.symmetric(horizontal: 25.w, vertical: 20.h),
+                child: Column(
+                  children: [
+                    // Animated Stats Cards
+                    Row(
                       children: [
-                        _TrendingTopicCard(
-                          emoji: '✈️',
-                          title: 'Flight Deals',
-                          color: Colors.blue,
-                          posts: '248',
+                        Expanded(
+                          child: _AnimatedStatCard(
+                            value: '1.2K',
+                            label: 'Members',
+                            icon: Icons.people_alt_outlined,
+                            color: kSecondary,
+                          ),
                         ),
-                        SizedBox(width: 12.w),
-                        _TrendingTopicCard(
-                          emoji: '🏝️',
-                          title: 'Island Getaways',
-                          color: Colors.teal,
-                          posts: '176',
-                        ),
-                        SizedBox(width: 12.w),
-                        _TrendingTopicCard(
-                          emoji: '📸',
-                          title: 'Photo Spots',
-                          color: Colors.purple,
-                          posts: '312',
-                        ),
-                        SizedBox(width: 12.w),
-                        _TrendingTopicCard(
-                          emoji: '🍽️',
-                          title: 'Local Eats',
-                          color: Colors.orange,
-                          posts: '421',
+                        SizedBox(width: 15.w),
+                        Expanded(
+                          child: _AnimatedStatCard(
+                            value: '356',
+                            label: 'Online Now',
+                            icon: Icons.online_prediction,
+                            color: Colors.green,
+                          ),
                         ),
                       ],
                     ),
-                  ),
-                ],
+                    SizedBox(height: 20.h),
+                    // Community Description
+                    Text(
+                      'Connect with fellow travelers, share experiences, and get inspired for your next adventure!',
+                      style: appStyle(
+                        16,
+                        kDark.withOpacity(0.8),
+                        FontWeight.w500,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ],
+                ),
               ),
             ),
-          ),
 
-          // Popular Discussions
-          SliverPadding(
-            padding: EdgeInsets.symmetric(horizontal: 20.w),
-            sliver: SliverToBoxAdapter(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        'Popular Discussions',
-                        style: appStyle(20, kDark, FontWeight.bold),
-                      ),
-                      TextButton(
-                        onPressed: () {},
-                        child: Text(
-                          'View All',
-                          style: appStyle(14, kSecondary, FontWeight.w600),
+            // Featured Post with Parallax
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: EdgeInsets.symmetric(horizontal: 20.w),
+                child: _FeaturedPostCard(),
+              ),
+            ),
+
+            // Trending Topics
+            SliverPadding(
+              padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 25.h),
+              sliver: SliverToBoxAdapter(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          'Trending Topics',
+                          style: appStyle(20, kDark, FontWeight.bold).copyWith(
+                            shadows: [
+                              Shadow(
+                                color: kSecondary.withOpacity(0.1),
+                                blurRadius: 4,
+                                offset: Offset(0, 2),
+                              ),
+                            ],
+                          ),
                         ),
+                        TextButton(
+                          onPressed: () {},
+                          child: Text(
+                            'See All',
+                            style: appStyle(14, kSecondary, FontWeight.w600),
+                          ),
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: 12.h),
+                    SizedBox(
+                      height: 150.h,
+                      child: ListView(
+                        scrollDirection: Axis.horizontal,
+                        physics: const BouncingScrollPhysics(),
+                        children: [
+                          _TrendingTopicCard(
+                            emoji: '✈️',
+                            title: 'Flight Deals',
+                            color: Colors.blue,
+                            posts: '248',
+                          ),
+                          SizedBox(width: 12.w),
+                          _TrendingTopicCard(
+                            emoji: '🏝️',
+                            title: 'Island Getaways',
+                            color: Colors.teal,
+                            posts: '176',
+                          ),
+                          SizedBox(width: 12.w),
+                          _TrendingTopicCard(
+                            emoji: '📸',
+                            title: 'Photo Spots',
+                            color: Colors.purple,
+                            posts: '312',
+                          ),
+                          SizedBox(width: 12.w),
+                          _TrendingTopicCard(
+                            emoji: '🍽️',
+                            title: 'Local Eats',
+                            color: Colors.orange,
+                            posts: '421',
+                          ),
+                        ],
                       ),
-                    ],
-                  ),
-                  SizedBox(height: 10.h),
-                ],
+                    ),
+                  ],
+                ),
               ),
             ),
-          ),
 
-          // Discussion List
-          SliverList(
-            delegate: SliverChildBuilderDelegate((context, index) {
-              final discussions = [
-                {
-                  'username': 'TravelLover22',
-                  'avatar': 'https://randomuser.me/api/portraits/women/44.jpg',
-                  'time': '2h ago',
-                  'title': 'Best hidden gems in Bali?',
-                  'content':
-                      'Looking for recommendations beyond the usual tourist spots...',
-                  'likes': '124',
-                  'comments': '32',
-                  'isHot': true,
-                },
-                {
-                  'username': 'WandererMike',
-                  'avatar': 'https://randomuser.me/api/portraits/men/32.jpg',
-                  'time': '5h ago',
-                  'title': 'Solo travel safety tips',
-                  'content':
-                      'Sharing my top 10 safety tips for solo travelers...',
-                  'likes': '89',
-                  'comments': '24',
-                  'isHot': false,
-                },
-                {
-                  'username': 'FoodExplorer',
-                  'avatar': 'https://randomuser.me/api/portraits/women/68.jpg',
-                  'time': '1d ago',
-                  'title': 'Must-try street foods in Bangkok',
-                  'content':
-                      'Compiled a list after living there for 3 months...',
-                  'likes': '215',
-                  'comments': '47',
-                  'isHot': true,
-                },
-              ];
-              return _DiscussionCard(
-                discussion: discussions[index % discussions.length],
-              );
-            }, childCount: 3),
-          ),
-          SliverToBoxAdapter(child: SizedBox(height: 30.h)),
-        ],
+            // Popular Discussions
+            SliverPadding(
+              padding: EdgeInsets.symmetric(horizontal: 20.w),
+              sliver: SliverToBoxAdapter(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          'Popular Discussions',
+                          style: appStyle(20, kDark, FontWeight.bold),
+                        ),
+                        TextButton(
+                          onPressed: () {},
+                          child: Text(
+                            'View All',
+                            style: appStyle(14, kSecondary, FontWeight.w600),
+                          ),
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: 10.h),
+                  ],
+                ),
+              ),
+            ),
+
+            // Discussion List
+            SliverList(
+              delegate: SliverChildBuilderDelegate((context, index) {
+                final discussions = [
+                  {
+                    'username': 'TravelLover22',
+                    'avatar':
+                        'https://randomuser.me/api/portraits/women/44.jpg',
+                    'time': '2h ago',
+                    'title': 'Best hidden gems in Bali?',
+                    'content':
+                        'Looking for recommendations beyond the usual tourist spots...',
+                    'likes': '124',
+                    'comments': '32',
+                    'isHot': true,
+                  },
+                  {
+                    'username': 'WandererMike',
+                    'avatar': 'https://randomuser.me/api/portraits/men/32.jpg',
+                    'time': '5h ago',
+                    'title': 'Solo travel safety tips',
+                    'content':
+                        'Sharing my top 10 safety tips for solo travelers...',
+                    'likes': '89',
+                    'comments': '24',
+                    'isHot': false,
+                  },
+                  {
+                    'username': 'FoodExplorer',
+                    'avatar':
+                        'https://randomuser.me/api/portraits/women/68.jpg',
+                    'time': '1d ago',
+                    'title': 'Must-try street foods in Bangkok',
+                    'content':
+                        'Compiled a list after living there for 3 months...',
+                    'likes': '215',
+                    'comments': '47',
+                    'isHot': true,
+                  },
+                ];
+                return _DiscussionCard(
+                  discussion: discussions[index % discussions.length],
+                );
+              }, childCount: 3),
+            ),
+            SliverToBoxAdapter(child: SizedBox(height: 30.h)),
+          ],
+        ),
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           showModalBottomSheet(
+            backgroundColor: kCardColor,
             context: Get.context!,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.vertical(top: Radius.circular(20.r)),
@@ -274,7 +273,7 @@ class CommunityScreen extends StatelessWidget {
                       leading: Icon(Icons.post_add, color: kSecondary),
                       title: Text(
                         "Add Post",
-                        style: TextStyle(fontSize: 16.sp),
+                        style: appStyleLato(16, kWhite, FontWeight.w300),
                       ),
                       onTap: () {
                         Get.back(); // Close the bottom sheet
@@ -290,7 +289,7 @@ class CommunityScreen extends StatelessWidget {
                       leading: Icon(Icons.history_edu, color: kSecondary),
                       title: Text(
                         "Add Story",
-                        style: TextStyle(fontSize: 16.sp),
+                        style: appStyle(16, kWhite, FontWeight.w300),
                       ),
                       onTap: () {
                         Get.back(); // Close the bottom sheet
@@ -367,7 +366,7 @@ class _AnimatedStatCardState extends State<_AnimatedStatCard>
       child: Container(
         padding: EdgeInsets.all(18.w),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: kCardColor,
           borderRadius: BorderRadius.circular(18.r),
           boxShadow: [
             BoxShadow(
@@ -593,7 +592,7 @@ class _DiscussionCard extends StatelessWidget {
     return Container(
       margin: EdgeInsets.only(bottom: 15.h, left: 20.w, right: 20.w),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: kCardColor,
         borderRadius: BorderRadius.circular(18.r),
         boxShadow: [
           BoxShadow(
