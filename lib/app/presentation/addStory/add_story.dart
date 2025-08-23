@@ -5,12 +5,13 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:new_flutter_app/app/core/constants/constdata.dart';
 import 'package:new_flutter_app/app/core/services/collection_refrence.dart';
-import 'package:new_flutter_app/app/core/services/upload_media_to_db.dart';
 import 'package:new_flutter_app/app/core/utils/app_styles.dart';
 import 'package:new_flutter_app/app/core/utils/toast_msg.dart';
+import 'package:new_flutter_app/app/global/helper/compress_image.dart';
 import 'package:new_flutter_app/app/global/models/category_model.dart';
 
 class AddStoryScreen extends StatefulWidget {
@@ -164,12 +165,50 @@ class _AddStoryScreenState extends State<AddStoryScreen> {
     }
   }
 
+  // Future<List<String>> _uploadMediaFiles() async {
+  //   List<String> downloadUrls = [];
+  //   final storage = FirebaseStorage.instance;
+
+  //   for (var mediaFile in _mediaFiles) {
+  //     try {
+  //       // Create a unique filename
+  //       String fileName =
+  //           'stories/$currentUId/${DateTime.now().millisecondsSinceEpoch}_${mediaFile.name}';
+
+  //       // Upload the file
+  //       TaskSnapshot snapshot = await storage
+  //           .ref(fileName)
+  //           .putFile(File(mediaFile.path));
+
+  //       // Get download URL
+  //       String downloadUrl = await snapshot.ref.getDownloadURL();
+  //       downloadUrls.add(downloadUrl);
+  //     } catch (e) {
+  //       log('Error uploading file: $e');
+  //       rethrow;
+  //     }
+  //   }
+
+  //   return downloadUrls;
+  // }
+
   Future<List<String>> _uploadMediaFiles() async {
     List<String> downloadUrls = [];
     final storage = FirebaseStorage.instance;
 
     for (var mediaFile in _mediaFiles) {
       try {
+        // Compress the image first
+        File? compressedFile;
+        if (mediaFile.path.toLowerCase().endsWith('.jpg') ||
+            mediaFile.path.toLowerCase().endsWith('.jpeg') ||
+            mediaFile.path.toLowerCase().endsWith('.png')) {
+          compressedFile = await compressImage(File(mediaFile.path));
+        }
+
+        // Use the compressed file if available, otherwise use original
+        final fileToUpload = compressedFile ?? File(mediaFile.path);
+
         // Create a unique filename
         String fileName =
             'stories/$currentUId/${DateTime.now().millisecondsSinceEpoch}_${mediaFile.name}';
@@ -177,14 +216,18 @@ class _AddStoryScreenState extends State<AddStoryScreen> {
         // Upload the file
         TaskSnapshot snapshot = await storage
             .ref(fileName)
-            .putFile(File(mediaFile.path));
+            .putFile(fileToUpload);
 
         // Get download URL
         String downloadUrl = await snapshot.ref.getDownloadURL();
         downloadUrls.add(downloadUrl);
+
+        // Delete the temporary compressed file if it exists
+        if (compressedFile != null && compressedFile.existsSync()) {
+          compressedFile.deleteSync();
+        }
       } catch (e) {
         log('Error uploading file: $e');
-        // You might want to continue with other files or abort
         rethrow;
       }
     }
@@ -266,7 +309,7 @@ class _AddStoryScreenState extends State<AddStoryScreen> {
       };
 
       final userRef = FirebaseFirestore.instance
-          .collection('Users')
+          .collection('Persons')
           .doc(currentUId);
       final userData = {
         'stories': FieldValue.arrayUnion([storyRef.id]),
@@ -433,7 +476,7 @@ class _AddStoryScreenState extends State<AddStoryScreen> {
                                       FontWeight.w300,
                                     ),
                                   ),
-                                  const Icon(Icons.arrow_drop_down, size: 20),
+                                  Icon(Icons.arrow_drop_down, size: 10.sp),
                                 ],
                               ),
                             ),
@@ -462,7 +505,7 @@ class _AddStoryScreenState extends State<AddStoryScreen> {
                                       FontWeight.w300,
                                     ),
                                   ),
-                                  const Icon(Icons.arrow_drop_down, size: 20),
+                                  Icon(Icons.arrow_drop_down, size: 10.sp),
                                 ],
                               ),
                             ),
@@ -472,7 +515,7 @@ class _AddStoryScreenState extends State<AddStoryScreen> {
                     ),
                     if (_startDate != null && _endDate != null)
                       Padding(
-                        padding: const EdgeInsets.only(top: 12.0),
+                        padding: const EdgeInsets.only(top: 8.0),
                         child: RichText(
                           text: TextSpan(
                             style: const TextStyle(
@@ -505,7 +548,7 @@ class _AddStoryScreenState extends State<AddStoryScreen> {
                   children: [
                     _buildSectionHeader(
                       '💸 Budget Breakdown',
-                      icon: Icons.attach_money,
+                      icon: Icons.currency_rupee,
                     ),
                     const SizedBox(height: 12),
                     Text(
@@ -1028,14 +1071,14 @@ class _AddStoryScreenState extends State<AddStoryScreen> {
       controller: controller,
       keyboardType: TextInputType.number,
       inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-      style: const TextStyle(fontSize: 12),
+      style: const TextStyle(fontSize: 10),
       decoration: _buildInputDecoration(
         label: label,
         prefixIcon: icon,
-        suffixIcon: const Text(
-          '₹',
-          style: TextStyle(fontSize: 12, color: Colors.black87),
-        ),
+        // suffixIcon: const Text(
+        //   '₹',
+        //   style: TextStyle(fontSize: 8, color: Colors.black87),
+        // ),
       ),
     );
   }

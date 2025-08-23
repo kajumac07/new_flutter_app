@@ -77,7 +77,11 @@ class _HomeScreenState extends State<HomeScreen> {
                   SizedBox(width: 5.w),
                   GlowingIconButton(
                     icon: Icons.person,
-                    onTap: () => Get.to(() => UserProfileScreen()),
+                    onTap: () => Get.to(
+                      () => UserProfileScreen(),
+                      transition: Transition.rightToLeftWithFade,
+                      duration: Duration(milliseconds: 500),
+                    ),
                   ),
                   SizedBox(width: 5.w),
                 ],

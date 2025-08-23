@@ -278,7 +278,11 @@ class CommunityScreen extends StatelessWidget {
                       ),
                       onTap: () {
                         Get.back(); // Close the bottom sheet
-                        Get.to(() => AddPostScreen());
+                        Get.to(
+                          () => AddPostScreen(),
+                          transition: Transition.downToUp,
+                          duration: Duration(milliseconds: 500),
+                        );
                       },
                     ),
                     Divider(),
@@ -292,6 +296,8 @@ class CommunityScreen extends StatelessWidget {
                         Get.back(); // Close the bottom sheet
                         Get.to(
                           () => AddStoryScreen(),
+                          transition: Transition.downToUp,
+                          duration: Duration(milliseconds: 500),
                         ); // Replace with your AddStoryScreen
                       },
                     ),

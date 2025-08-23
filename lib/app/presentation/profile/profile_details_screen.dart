@@ -30,7 +30,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
             slivers: [
               // Profile Header with proper app bar spacing
               SliverAppBar(
-                expandedHeight: 250.h,
+                expandedHeight: 295.h,
                 floating: false,
                 pinned: true,
                 flexibleSpace: LayoutBuilder(
