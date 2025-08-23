@@ -8,6 +8,7 @@ import 'package:new_flutter_app/app/global/models/user_model.dart';
 import 'package:new_flutter_app/app/presentation/storyDetails/widgets/author_sectioon.dart';
 import 'package:new_flutter_app/app/presentation/storyDetails/widgets/budget_breakdown.dart';
 import 'package:new_flutter_app/app/presentation/storyDetails/widgets/comment_section.dart';
+import 'package:new_flutter_app/app/presentation/storyDetails/widgets/gallery_section.dart';
 import 'package:new_flutter_app/app/presentation/storyDetails/widgets/rating_section.dart';
 import 'package:new_flutter_app/app/presentation/storyDetails/widgets/stay_section.dart';
 import 'package:new_flutter_app/app/presentation/storyDetails/widgets/story_content_section.dart';
@@ -94,14 +95,25 @@ class _PremiumStoryDetailsScreenState extends State<PremiumStoryDetailsScreen> {
                   ),
 
                   // Location tags
+
+                  // Location tags
                   Positioned(
-                    top: 120.h,
+                    bottom: 40.h,
                     left: 20.w,
-                    child: Wrap(
-                      spacing: 8.w,
-                      children: widget.story.locations
-                          .map((location) => LocationChip(location: location))
-                          .toList(),
+                    right: 20.w,
+                    child: Container(
+                      constraints: BoxConstraints(maxHeight: 120.h),
+                      child: SingleChildScrollView(
+                        scrollDirection: Axis.horizontal,
+                        child: Wrap(
+                          spacing: 8.w,
+                          children: widget.story.locations
+                              .map(
+                                (location) => LocationChip(location: location),
+                              )
+                              .toList(),
+                        ),
+                      ),
                     ),
                   ),
                 ],
@@ -219,7 +231,11 @@ class _PremiumStoryDetailsScreenState extends State<PremiumStoryDetailsScreen> {
                   if (widget.story.isComentable)
                     CommentsSection(comments: widget.story.comments),
 
-                  SizedBox(height: 60.h),
+                  SizedBox(height: 30.h),
+                  // Gallery Section
+                  EnhancedGallerySection(images: widget.story.media),
+
+                  SizedBox(height: 50.h),
                 ],
               ),
             ),
@@ -329,8 +345,6 @@ class _PremiumStoryDetailsScreenState extends State<PremiumStoryDetailsScreen> {
   }
 }
 
-// Custom Widgets for each section
-
 class LocationChip extends StatelessWidget {
   final String location;
 
@@ -376,7 +390,7 @@ class TravelTipsSection extends StatelessWidget {
       children: [
         Text(
           "Traveler's Wisdom",
-          style: GoogleFonts.playfairDisplay(
+          style: GoogleFonts.lato(
             fontSize: 22.sp,
             fontWeight: FontWeight.w700,
             color: Colors.black87,

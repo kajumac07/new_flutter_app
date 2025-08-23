@@ -1,3 +1,6 @@
+import 'dart:developer';
+
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:cached_network_image/cached_network_image.dart';
@@ -8,6 +11,7 @@ import 'package:new_flutter_app/app/global/widgets/glowing_icon_button.dart';
 import 'package:new_flutter_app/app/presentation/cloudNotificationScreen/cloud_notification_screen.dart';
 import 'package:new_flutter_app/app/presentation/home/widgets/categories.dart';
 import 'package:new_flutter_app/app/presentation/home/widgets/drawer.dart';
+import 'package:new_flutter_app/app/presentation/home/widgets/trending_story_widget.dart';
 import 'package:new_flutter_app/app/presentation/profile/profile_details_screen.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:get/get.dart';
@@ -22,6 +26,24 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+  final Future<QuerySnapshot> trendingStories = FirebaseFirestore.instance
+      .collection('Stories')
+      .get();
+  @override
+  void initState() {
+    fetchTrendingStories();
+    super.initState();
+  }
+
+  void fetchTrendingStories() async {
+    try {
+      final QuerySnapshot snapshot = await trendingStories;
+      log('Fetched ${snapshot.docs.length} trending stories.');
+    } catch (e) {
+      log('Error fetching trending stories: $e');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -140,39 +162,9 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                 ),
               ),
-              SliverToBoxAdapter(
-                child: SizedBox(
-                  height: 260.h,
-                  child: ListView.builder(
-                    scrollDirection: Axis.horizontal,
-                    padding: EdgeInsets.only(left: 20.w, right: 20.w),
-                    itemCount: 4,
-                    itemBuilder: (_, index) {
-                      return _QuantumStoryCard(
-                        imageUrl: [
-                          'https://images.unsplash.com/photo-1597735881932-d9664c9bbcea?q=80&w=2497&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
-                          'https://images.unsplash.com/photo-1527631746610-bca00a040d60',
-                          'https://images.unsplash.com/photo-1501785888041-af3ef285b470',
-                          'https://images.unsplash.com/photo-1464037866556-6812c9d1c72e',
-                        ][index],
-                        title: [
-                          'Kerala Culture',
-                          'Black Hole Dive',
-                          'Supernova Camp',
-                          'Andromeda Tour',
-                        ][index],
-                        author: [
-                          'Dr. Space',
-                          'Cosmo Girl',
-                          'Star Lord',
-                          'Galaxy Queen',
-                        ][index],
-                      );
-                    },
-                  ),
-                ),
-              ),
 
+              //trending stories list
+              TrendingStoryWidget(trendingStories: trendingStories),
               // 5. Celestial Destinations
               SliverToBoxAdapter(
                 child: Padding(
@@ -554,102 +546,6 @@ class _GalacticDestinationCard extends StatelessWidget {
                   ],
                 ),
               ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _QuantumStoryCard extends StatelessWidget {
-  final String imageUrl;
-  final String title;
-  final String author;
-
-  const _QuantumStoryCard({
-    required this.imageUrl,
-    required this.title,
-    required this.author,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: 180.w,
-      margin: EdgeInsets.only(right: 16.w),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(24.r),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 10,
-            spreadRadius: 2,
-          ),
-        ],
-      ),
-      child: Stack(
-        children: [
-          // Cached Image with Shimmer
-          ClipRRect(
-            borderRadius: BorderRadius.circular(24.r),
-            child: CachedNetworkImage(
-              imageUrl: imageUrl,
-              fit: BoxFit.cover,
-              width: double.infinity,
-              height: double.infinity,
-              placeholder: (context, url) => Shimmer.fromColors(
-                baseColor: Colors.grey.shade800,
-                highlightColor: Colors.grey.shade700,
-                child: Container(
-                  color: Colors.grey.shade900,
-                  width: double.infinity,
-                  height: double.infinity,
-                ),
-              ),
-            ),
-          ),
-
-          // Content
-          Padding(
-            padding: EdgeInsets.all(16.w),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.end,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: appStyleRaleway(16, kWhite, FontWeight.w800),
-                ),
-                SizedBox(height: 8.h),
-                Text(
-                  'By $author',
-                  style: appStyleLato(
-                    12,
-                    kWhite.withOpacity(0.9),
-                    FontWeight.w400,
-                  ),
-                ),
-              ],
-            ),
-          ),
-
-          // Floating Action Button
-          Positioned(
-            top: 12.w,
-            right: 12.w,
-            child: Container(
-              width: 36.w,
-              height: 36.h,
-              decoration: BoxDecoration(
-                color: kSecondary,
-                shape: BoxShape.circle,
-              ),
-              child: Icon(
-                Icons.bookmark_border,
-                color: Colors.white,
-                size: 18.w,
-              ),
             ),
           ),
         ],

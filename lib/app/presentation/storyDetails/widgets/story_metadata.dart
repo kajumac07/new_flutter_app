@@ -29,7 +29,7 @@ class StoryMetadataCard extends StatelessWidget {
         children: [
           Text(
             story.title,
-            style: GoogleFonts.playfairDisplay(
+            style: GoogleFonts.poppins(
               fontSize: 28.sp,
               fontWeight: FontWeight.w700,
               color: Colors.black87,

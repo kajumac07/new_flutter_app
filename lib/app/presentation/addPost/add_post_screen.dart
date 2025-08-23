@@ -172,7 +172,7 @@ class _AddPostScreenState extends State<AddPostScreen> {
 
       //update user profile with posts array to store postId
       final userRef = FirebaseFirestore.instance
-          .collection('Users')
+          .collection('Persons')
           .doc(currentUId);
       final userData = {
         'posts': FieldValue.arrayUnion([postRef.id]),
@@ -448,7 +448,7 @@ class _AddPostScreenState extends State<AddPostScreen> {
                   ),
                   const SizedBox(height: 12),
                   Text(
-                    'Add photos or videos',
+                    'Add photos',
                     style: TextStyle(
                       color: Colors.grey[700],
                       fontSize: 14,
@@ -457,7 +457,7 @@ class _AddPostScreenState extends State<AddPostScreen> {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    'JPEG, PNG, MP4 up to 10MB',
+                    'JPEG, PNG, up to 2MB',
                     style: TextStyle(color: Colors.grey[500], fontSize: 12),
                   ),
                 ],

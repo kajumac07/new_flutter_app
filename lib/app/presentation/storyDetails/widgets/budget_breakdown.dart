@@ -16,7 +16,7 @@ class BudgetBreakdownSection extends StatelessWidget {
       children: [
         Text(
           "Budget Breakdown",
-          style: GoogleFonts.playfairDisplay(
+          style: GoogleFonts.lato(
             fontSize: 22.sp,
             fontWeight: FontWeight.w700,
             color: Colors.black87,

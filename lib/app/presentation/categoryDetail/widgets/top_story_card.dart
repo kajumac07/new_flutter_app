@@ -5,6 +5,7 @@ import 'package:get/get.dart';
 import 'package:new_flutter_app/app/core/constants/constdata.dart';
 import 'package:new_flutter_app/app/core/services/collection_refrence.dart';
 import 'package:new_flutter_app/app/core/utils/app_styles.dart';
+import 'package:new_flutter_app/app/global/helper/truncate_with_elipsis.dart';
 import 'package:new_flutter_app/app/presentation/storyDetails/story_details_screen.dart';
 import 'package:shimmer/shimmer.dart';
 
@@ -116,8 +117,8 @@ class TopStoryCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    story.title,
-                    style: appStyle(16, kDark, FontWeight.bold),
+                    truncateWithEllipsis(18, story.title),
+                    style: appStyle(13, kDark, FontWeight.bold),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -125,11 +126,22 @@ class TopStoryCard extends StatelessWidget {
                   Row(
                     children: [
                       Icon(Icons.location_on, size: 14.sp, color: kGray),
-                      SizedBox(width: 5.w),
+                      // SizedBox(width: 5.w),
+                      // Text(
+                      //   story.locations.isNotEmpty
+                      //       ? story.locations[0]
+                      //       : 'Unknown Location',
+                      //   style: appStyle(12, kGray, FontWeight.normal),
+                      //   maxLines: 1,
+                      //   overflow: TextOverflow.ellipsis,
+                      // ),
                       Text(
-                        story.locations.isNotEmpty
-                            ? story.locations[0]
-                            : 'Unknown Location',
+                        truncateWithEllipsis(
+                          20,
+                          story.locations.isNotEmpty
+                              ? story.locations[0]
+                              : 'Unknown Location',
+                        ),
                         style: appStyle(12, kGray, FontWeight.normal),
                       ),
                       Spacer(),

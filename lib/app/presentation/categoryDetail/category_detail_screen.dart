@@ -8,7 +8,6 @@ import 'package:new_flutter_app/app/global/controller/post_coontroller.dart';
 import 'package:new_flutter_app/app/global/controller/story_controller.dart';
 import 'package:new_flutter_app/app/presentation/categoryDetail/widgets/popular_posts.dart';
 import 'package:new_flutter_app/app/presentation/categoryDetail/widgets/top_story_card.dart';
-import 'package:new_flutter_app/app/presentation/storyDetails/story_details_screen.dart';
 import 'package:shimmer/shimmer.dart';
 
 class CategoryDetailScreen extends StatefulWidget {
@@ -115,7 +114,7 @@ class _CategoryDetailScreenState extends State<CategoryDetailScreen> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        'Top Stories',
+                        'Stories',
                         style: appStyle(20, kDark, FontWeight.bold),
                       ),
                       TextButton(
@@ -206,7 +205,7 @@ class _CategoryDetailScreenState extends State<CategoryDetailScreen> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        'Popular Posts',
+                        'Posts',
                         style: appStyle(20, kDark, FontWeight.bold),
                       ),
                       TextButton(

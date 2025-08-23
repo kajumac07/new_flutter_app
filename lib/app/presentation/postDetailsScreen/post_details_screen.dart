@@ -7,6 +7,7 @@ import 'package:iconsax/iconsax.dart';
 import 'package:new_flutter_app/app/core/constants/constdata.dart';
 import 'package:new_flutter_app/app/core/services/collection_refrence.dart';
 import 'package:new_flutter_app/app/global/models/post_model.dart';
+import 'package:new_flutter_app/app/presentation/storyDetails/widgets/gallery_section.dart';
 import 'package:timeago/timeago.dart' as timeago;
 
 class PostDetailsScreen extends StatefulWidget {
@@ -24,7 +25,8 @@ class _PostDetailsScreenState extends State<PostDetailsScreen> {
   final TextEditingController _commentController = TextEditingController();
   late List<Map<String, dynamic>> comments = [];
   late String userName = "Loading...";
-  late String userProfileImage = "https://via.placeholder.com/150";
+  late String userProfileImage =
+      "https://firebasestorage.googleapis.com/v0/b/rabbit-service-d3d90.appspot.com/o/profile.png?alt=media&token=43b149e9-b4ee-458f-8271-5946b77ff658";
   late String currentUserName = "";
   late String currentUserProfileImage = "";
   bool isLoading = false;
@@ -227,6 +229,8 @@ class _PostDetailsScreenState extends State<PostDetailsScreen> {
                   _buildPostHeader(),
                   SizedBox(height: 20.h),
                   _buildPostContent(),
+                  SizedBox(height: 25.h),
+                  EnhancedGallerySection(images: widget.post.media),
                   SizedBox(height: 25.h),
                   _buildInteractionStats(),
                   SizedBox(height: 30.h),

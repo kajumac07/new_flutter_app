@@ -17,7 +17,7 @@ class RatingsSection extends StatelessWidget {
       children: [
         Text(
           "Ratings & Reviews",
-          style: GoogleFonts.playfairDisplay(
+          style: GoogleFonts.lato(
             fontSize: 22.sp,
             fontWeight: FontWeight.w700,
             color: Colors.black87,
