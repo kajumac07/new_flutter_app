@@ -11,6 +11,7 @@ import 'package:new_flutter_app/app/global/controller/profile_controller.dart';
 import 'package:new_flutter_app/app/global/helper/location_picker_sheet.dart';
 import 'package:new_flutter_app/app/global/helper/tags_editor.dart';
 import 'package:new_flutter_app/app/global/models/category_model.dart';
+import 'package:new_flutter_app/app/global/widgets/custom_container.dart';
 
 class AddPostScreen extends StatefulWidget {
   const AddPostScreen({super.key});
@@ -231,7 +232,7 @@ class _AddPostScreenState extends State<AddPostScreen> {
               _selectedCategoryId = selected ? category.label : null;
             });
           },
-          backgroundColor: Colors.white,
+          backgroundColor: kCardColor,
           selectedColor: color,
           side: BorderSide(color: color.withOpacity(0.3), width: 1.5),
           shape: RoundedRectangleBorder(
@@ -276,7 +277,7 @@ class _AddPostScreenState extends State<AddPostScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey[50],
+      // backgroundColor: Colors.grey[50],
       appBar: AppBar(
         title: const Text(
           'Create Post',
@@ -288,7 +289,7 @@ class _AddPostScreenState extends State<AddPostScreen> {
         ),
         centerTitle: true,
         elevation: 0,
-        backgroundColor: kSecondary,
+        backgroundColor: kCardColor,
         foregroundColor: kWhite,
         actions: [
           IconButton(
@@ -297,31 +298,33 @@ class _AddPostScreenState extends State<AddPostScreen> {
           ),
         ],
       ),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Author Info
-              _buildAuthorInfo(profileController),
-              const SizedBox(height: 24),
+      body: CustomGradientContainer(
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Author Info
+                _buildAuthorInfo(profileController),
+                const SizedBox(height: 24),
 
-              // Media Upload
-              _buildMediaUploadSection(),
-              const SizedBox(height: 28),
+                // Media Upload
+                _buildMediaUploadSection(),
+                const SizedBox(height: 28),
 
-              // Post Content
-              _buildPostContentSection(),
-              const SizedBox(height: 28),
+                // Post Content
+                _buildPostContentSection(),
+                const SizedBox(height: 28),
 
-              // Post Settings
-              _buildPostSettingsSection(),
-              const SizedBox(height: 32),
+                // Post Settings
+                _buildPostSettingsSection(),
+                const SizedBox(height: 32),
 
-              // Submit Button
-              _buildSubmitButton(),
-            ],
+                // Submit Button
+                _buildSubmitButton(),
+              ],
+            ),
           ),
         ),
       ),
@@ -339,15 +342,8 @@ class _AddPostScreenState extends State<AddPostScreen> {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: kCardColor,
         borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 8,
-            offset: const Offset(0, 4),
-          ),
-        ],
       ),
       child: Row(
         children: [
@@ -365,12 +361,16 @@ class _AddPostScreenState extends State<AddPostScreen> {
             children: [
               Text(
                 user?.fullName ?? 'Anonymous',
-                style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
+                style: TextStyle(
+                  fontWeight: FontWeight.w600,
+                  fontSize: 16,
+                  color: kWhite,
+                ),
               ),
               const SizedBox(height: 2),
               Text(
                 _isPublic ? 'Visible to everyone' : 'Visible to you only',
-                style: TextStyle(color: Colors.grey[600], fontSize: 12),
+                style: TextStyle(color: kSecondary, fontSize: 12),
               ),
             ],
           ),
@@ -385,7 +385,7 @@ class _AddPostScreenState extends State<AddPostScreen> {
               child: Icon(
                 _isPublic ? Icons.public : Icons.lock_outline,
                 size: 20,
-                color: _isPublic ? Colors.blue : Colors.grey[700],
+                color: _isPublic ? kSecondary : Colors.grey[700],
               ),
             ),
             onPressed: () {
@@ -408,7 +408,7 @@ class _AddPostScreenState extends State<AddPostScreen> {
             style: TextStyle(
               fontSize: 12,
               fontWeight: FontWeight.w600,
-              color: Colors.grey[600],
+              color: kWhite,
               letterSpacing: 0.5,
             ),
           ),
@@ -420,16 +420,9 @@ class _AddPostScreenState extends State<AddPostScreen> {
               height: 180,
               width: double.infinity,
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: kCardColor,
                 borderRadius: BorderRadius.circular(14),
-                border: Border.all(color: Colors.grey[200]!, width: 1.5),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.03),
-                    blurRadius: 10,
-                    offset: const Offset(0, 4),
-                  ),
-                ],
+                border: Border.all(color: kCardColor, width: 1.5),
               ),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -437,20 +430,20 @@ class _AddPostScreenState extends State<AddPostScreen> {
                   Container(
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
-                      color: Colors.blue[50],
+                      color: kSecondary.withAlpha(50),
                       shape: BoxShape.circle,
                     ),
                     child: Icon(
                       Icons.add_photo_alternate_outlined,
                       size: 32,
-                      color: Colors.blue[700],
+                      color: kWhite,
                     ),
                   ),
                   const SizedBox(height: 12),
                   Text(
                     'Add photos',
                     style: TextStyle(
-                      color: Colors.grey[700],
+                      color: kWhite,
                       fontSize: 14,
                       fontWeight: FontWeight.w500,
                     ),
@@ -458,7 +451,7 @@ class _AddPostScreenState extends State<AddPostScreen> {
                   const SizedBox(height: 4),
                   Text(
                     'JPEG, PNG, up to 2MB',
-                    style: TextStyle(color: Colors.grey[500], fontSize: 12),
+                    style: TextStyle(color: kWhite, fontSize: 12),
                   ),
                 ],
               ),
@@ -563,15 +556,15 @@ class _AddPostScreenState extends State<AddPostScreen> {
             floatingLabelBehavior: FloatingLabelBehavior.auto,
             border: InputBorder.none,
             filled: true,
-            fillColor: Colors.white,
+            fillColor: kCardColor,
             contentPadding: const EdgeInsets.all(18),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: Colors.grey[200]!),
+              borderSide: BorderSide(color: kCardColor!),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(color: Colors.blue, width: 1.5),
+              borderSide: const BorderSide(color: kCardColor, width: 1.5),
             ),
             errorBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
@@ -603,15 +596,15 @@ class _AddPostScreenState extends State<AddPostScreen> {
             floatingLabelBehavior: FloatingLabelBehavior.auto,
             border: InputBorder.none,
             filled: true,
-            fillColor: Colors.white,
+            fillColor: kCardColor,
             contentPadding: const EdgeInsets.all(18),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: Colors.grey[200]!),
+              borderSide: BorderSide(color: kCardColor),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(color: Colors.blue, width: 1.5),
+              borderSide: const BorderSide(color: kCardColor, width: 1.5),
             ),
           ),
         ),
@@ -628,7 +621,7 @@ class _AddPostScreenState extends State<AddPostScreen> {
                 style: TextStyle(
                   fontSize: 12,
                   fontWeight: FontWeight.w600,
-                  color: Colors.grey[600],
+                  color: kWhite,
                   letterSpacing: 0.5,
                 ),
               ),
@@ -636,9 +629,9 @@ class _AddPostScreenState extends State<AddPostScreen> {
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: kCardColor,
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: Colors.grey[200]!),
+                border: Border.all(color: kCardColor),
               ),
               child: _buildCategoryChips(),
             ),
@@ -659,23 +652,16 @@ class _AddPostScreenState extends State<AddPostScreen> {
             style: TextStyle(
               fontSize: 12,
               fontWeight: FontWeight.w600,
-              color: Colors.grey[600],
+              color: kWhite,
               letterSpacing: 0.5,
             ),
           ),
         ),
         Container(
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: kCardColor,
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: Colors.grey[200]!),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.03),
-                blurRadius: 8,
-                offset: const Offset(0, 4),
-              ),
-            ],
+            border: Border.all(color: kCardColor),
           ),
           child: Column(
             children: [
@@ -756,18 +742,22 @@ class _AddPostScreenState extends State<AddPostScreen> {
         width: 36,
         height: 36,
         decoration: BoxDecoration(
-          color: Colors.grey[100],
+          color: kSecondary.withAlpha(100),
           shape: BoxShape.circle,
         ),
-        child: Icon(icon, size: 20, color: Colors.grey[700]),
+        child: Icon(icon, size: 20, color: kWhite),
       ),
       title: Text(
         title,
-        style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 15),
+        style: const TextStyle(
+          fontWeight: FontWeight.w500,
+          fontSize: 15,
+          color: kWhite,
+        ),
       ),
       subtitle: Text(
         subtitle,
-        style: TextStyle(color: Colors.grey[600], fontSize: 13),
+        style: TextStyle(color: kWhite.withAlpha(100), fontSize: 13),
         maxLines: 1,
         overflow: TextOverflow.ellipsis,
       ),
