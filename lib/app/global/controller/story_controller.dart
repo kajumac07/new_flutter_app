@@ -27,7 +27,7 @@ class StoryController extends GetxController {
           .toList();
 
       isLoading = false;
-      update(); // if using GetBuilder
+      update();
     } catch (e) {
       showToastMessage("Error", "Error fetching stories: $e", kRed);
       isLoading = false;

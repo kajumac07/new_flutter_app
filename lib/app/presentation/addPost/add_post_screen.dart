@@ -172,6 +172,16 @@ class _AddPostScreenState extends State<AddPostScreen> {
         'status': _scheduledDate == null ? 'published' : 'scheduled',
       };
 
+      //update user profile with posts array to store postId
+      final userRef = FirebaseFirestore.instance
+          .collection('Users')
+          .doc(currentUId);
+      final userData = {
+        'posts': FieldValue.arrayUnion([postRef.id]),
+      };
+      // 3. Update user profile
+      batch.update(userRef, userData);
+
       // 3. Save to Firestore
       batch.set(postRef, postData);
       // Commit the batch

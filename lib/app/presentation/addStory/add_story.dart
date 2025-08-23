@@ -264,6 +264,15 @@ class _AddStoryScreenState extends State<AddStoryScreen> {
         'createdAt': Timestamp.now(),
         'updatedAt': Timestamp.now(),
       };
+
+      final userRef = FirebaseFirestore.instance
+          .collection('Users')
+          .doc(currentUId);
+      final userData = {
+        'stories': FieldValue.arrayUnion([storyRef.id]),
+      };
+      // 3. Update user profile with stories array
+      batch.update(userRef, userData);
       // 3. Save to Firestore
       batch.set(storyRef, storyData);
       // Commit the batch

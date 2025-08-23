@@ -31,6 +31,7 @@ class DatabaseServices {
       "profilePicture":
           "https://firebasestorage.googleapis.com/v0/b/rabbit-service-d3d90.appspot.com/o/profile.png?alt=media&token=43b149e9-b4ee-458f-8271-5946b77ff658",
       "posts": [],
+      "stories": [],
       "followers": [],
       "following": [],
       "isOnline": true,
