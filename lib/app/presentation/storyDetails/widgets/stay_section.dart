@@ -20,7 +20,7 @@ class StayReviewSection extends StatelessWidget {
           style: GoogleFonts.lato(
             fontSize: 22.sp,
             fontWeight: FontWeight.w700,
-            color: Colors.black87,
+            color: kWhite,
           ),
         ),
         SizedBox(height: 8.h),
@@ -28,7 +28,7 @@ class StayReviewSection extends StatelessWidget {
           width: 40.w,
           height: 3.h,
           decoration: BoxDecoration(
-            gradient: const LinearGradient(colors: [kPrimary, kPrimary]),
+            gradient: const LinearGradient(colors: [kSecondary, kSecondary]),
             borderRadius: BorderRadius.circular(3.r),
           ),
         ),
@@ -36,15 +36,8 @@ class StayReviewSection extends StatelessWidget {
         Container(
           padding: EdgeInsets.all(20.w),
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: kCardColor,
             borderRadius: BorderRadius.circular(16.r),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.05),
-                blurRadius: 20,
-                offset: const Offset(0, 10),
-              ),
-            ],
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -74,6 +67,7 @@ class StayReviewSection extends StatelessWidget {
                           style: GoogleFonts.poppins(
                             fontSize: 16.sp,
                             fontWeight: FontWeight.w600,
+                            color: kWhite,
                           ),
                         ),
                         SizedBox(height: 4.h),
@@ -96,7 +90,7 @@ class StayReviewSection extends StatelessWidget {
                 style: GoogleFonts.poppins(
                   fontSize: 14.sp,
                   height: 1.8,
-                  color: Colors.grey[700],
+                  color: kWhite.withOpacity(0.7),
                 ),
               ),
             ],

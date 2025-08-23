@@ -2,6 +2,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:new_flutter_app/app/core/constants/constdata.dart';
 import 'package:new_flutter_app/app/global/models/user_model.dart';
 
 class AuthorSection extends StatelessWidget {
@@ -26,7 +27,7 @@ class AuthorSection extends StatelessWidget {
     return Container(
       padding: EdgeInsets.all(16.w),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: kCardColor,
         borderRadius: BorderRadius.circular(12.r),
         boxShadow: [
           BoxShadow(
@@ -52,7 +53,7 @@ class AuthorSection extends StatelessWidget {
                   style: GoogleFonts.poppins(
                     fontSize: 16.sp,
                     fontWeight: FontWeight.w600,
-                    color: Colors.black87,
+                    color: kDark,
                   ),
                 ),
                 SizedBox(height: 4.h),
@@ -60,7 +61,7 @@ class AuthorSection extends StatelessWidget {
                   "@${author!.userName}",
                   style: GoogleFonts.poppins(
                     fontSize: 13.sp,
-                    color: Colors.grey[600],
+                    color: kDark.withOpacity(0.7),
                   ),
                 ),
               ],
@@ -72,11 +73,11 @@ class AuthorSection extends StatelessWidget {
               child: Container(
                 padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
                 decoration: BoxDecoration(
-                  color: isFollowing ? Colors.grey[200] : Colors.blueAccent,
+                  color: isFollowing ? Colors.grey[200] : kSecondary,
                   borderRadius: BorderRadius.circular(20.r),
                 ),
                 child: Text(
-                  isFollowing ? "Following" : "Follow",
+                  isFollowing ? "UnFollow" : "Follow",
                   style: GoogleFonts.poppins(
                     fontSize: 14.sp,
                     fontWeight: FontWeight.w500,

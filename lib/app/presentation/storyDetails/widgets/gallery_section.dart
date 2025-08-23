@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:iconsax/iconsax.dart';
+import 'package:new_flutter_app/app/core/constants/constdata.dart';
 
 class EnhancedGallerySection extends StatefulWidget {
   final List<String> images;
@@ -57,13 +57,13 @@ class _EnhancedGallerySectionState extends State<EnhancedGallerySection>
                 style: GoogleFonts.poppins(
                   fontSize: 24.sp,
                   fontWeight: FontWeight.w700,
-                  color: Colors.black87,
+                  color: kWhite,
                 ),
               ),
               Container(
                 padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
                 decoration: BoxDecoration(
-                  color: Colors.blue.shade50,
+                  color: kCardColor,
                   borderRadius: BorderRadius.circular(20.r),
                 ),
                 child: Text(
@@ -71,7 +71,7 @@ class _EnhancedGallerySectionState extends State<EnhancedGallerySection>
                   style: GoogleFonts.poppins(
                     fontSize: 12.sp,
                     fontWeight: FontWeight.w500,
-                    color: Colors.blue.shade700,
+                    color: kSecondary.withAlpha(100),
                   ),
                 ),
               ),
@@ -222,7 +222,7 @@ class _EnhancedGallerySectionState extends State<EnhancedGallerySection>
       child: Container(
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(8.r),
-          color: Colors.grey.shade200,
+          color: kCardColor,
         ),
         child: ClipRRect(
           borderRadius: BorderRadius.circular(8.r),
@@ -239,9 +239,9 @@ class _EnhancedGallerySectionState extends State<EnhancedGallerySection>
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                     colors: [
-                      Colors.grey.shade300,
-                      Colors.grey.shade100,
-                      Colors.grey.shade300,
+                      kCardColor,
+                      kCardColor.withOpacity(0.5),
+                      kCardColor,
                     ],
                   ),
                 ),
@@ -251,7 +251,7 @@ class _EnhancedGallerySectionState extends State<EnhancedGallerySection>
                         ? loadingProgress.cumulativeBytesLoaded /
                               loadingProgress.expectedTotalBytes!
                         : null,
-                    color: Colors.blue.shade400,
+                    color: kSecondary,
                   ),
                 ),
               );

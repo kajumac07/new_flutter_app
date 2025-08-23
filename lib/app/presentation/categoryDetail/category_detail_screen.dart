@@ -31,279 +31,291 @@ class _CategoryDetailScreenState extends State<CategoryDetailScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       extendBodyBehindAppBar: true,
-      body: CustomScrollView(
-        physics: const BouncingScrollPhysics(),
-        slivers: [
-          // Expanded Header with Parallax Effect
-          SliverAppBar(
-            expandedHeight: 250.h,
-            collapsedHeight: 80.h,
-            pinned: true,
-            stretch: true,
-            flexibleSpace: FlexibleSpaceBar(
-              title: Text(
-                widget.categoryName,
-                style: appStyle(22, Colors.white, FontWeight.bold).copyWith(
-                  shadows: [
-                    Shadow(
-                      color: Colors.black.withOpacity(0.5),
-                      blurRadius: 10,
-                      offset: Offset(0, 2),
+      backgroundColor: kCardColor,
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [Color(0xFF0F2027), Color(0xFF203A43), Color(0xFF2C5364)],
+          ),
+        ),
+        child: CustomScrollView(
+          physics: const BouncingScrollPhysics(),
+          slivers: [
+            // Expanded Header with Parallax Effect
+            SliverAppBar(
+              expandedHeight: 250.h,
+              collapsedHeight: 80.h,
+              pinned: true,
+              stretch: true,
+              backgroundColor: Colors.transparent,
+              iconTheme: IconThemeData(color: Colors.white, size: 24.sp),
+              flexibleSpace: FlexibleSpaceBar(
+                title: Text(
+                  widget.categoryName,
+                  style: appStyle(22, Colors.white, FontWeight.bold).copyWith(
+                    shadows: [
+                      Shadow(
+                        color: Colors.black.withOpacity(0.5),
+                        blurRadius: 10,
+                        offset: Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                ),
+                background: Stack(
+                  fit: StackFit.expand,
+                  children: [
+                    // Blurred Background Image
+                    CachedNetworkImage(
+                      imageUrl: _getCategoryBackground(widget.categoryName),
+                      fit: BoxFit.cover,
+                      color: widget.categoryColor.withOpacity(0.3),
+                      colorBlendMode: BlendMode.overlay,
+                    ),
+                    // Gradient Overlay
+                    Container(
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                          colors: [
+                            Colors.transparent,
+                            widget.categoryColor.withOpacity(0.7),
+                          ],
+                        ),
+                      ),
+                    ),
+                    // Category Emoji
+                    Center(
+                      child: Hero(
+                        tag: 'category-${widget.categoryName}',
+                        child: Text(
+                          widget.categoryEmoji,
+                          style: TextStyle(fontSize: 100.sp),
+                        ),
+                      ),
                     ),
                   ],
                 ),
               ),
-              background: Stack(
-                fit: StackFit.expand,
-                children: [
-                  // Blurred Background Image
-                  CachedNetworkImage(
-                    imageUrl: _getCategoryBackground(widget.categoryName),
-                    fit: BoxFit.cover,
-                    color: widget.categoryColor.withOpacity(0.3),
-                    colorBlendMode: BlendMode.overlay,
-                  ),
-                  // Gradient Overlay
-                  Container(
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.topCenter,
-                        end: Alignment.bottomCenter,
-                        colors: [
-                          Colors.transparent,
-                          widget.categoryColor.withOpacity(0.7),
-                        ],
-                      ),
-                    ),
-                  ),
-                  // Category Emoji
-                  Center(
-                    child: Hero(
-                      tag: 'category-${widget.categoryName}',
-                      child: Text(
-                        widget.categoryEmoji,
-                        style: TextStyle(fontSize: 100.sp),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
             ),
-          ),
 
-          // Content Section
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: EdgeInsets.symmetric(horizontal: 20.w),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  SizedBox(height: 20.h),
-                  // Category Description
-                  Text(
-                    _getCategoryDescription(widget.categoryName),
-                    style: appStyle(
-                      16,
-                      kDark.withOpacity(0.8),
-                      FontWeight.normal,
-                    ),
-                  ),
-                  SizedBox(height: 20.h),
-                  // Section Title with View All
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        'Stories',
-                        style: appStyle(20, kDark, FontWeight.bold),
-                      ),
-                      TextButton(
-                        onPressed: () {},
-                        child: Text(
-                          'View all',
-                          style: appStyle(14, kSecondary, FontWeight.w600),
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-          ),
-          // Top stories Grid
-          GetBuilder<StoryController>(
-            init: StoryController(),
-            builder: (storyController) {
-              if (storyController.isLoading) {
-                return SliverToBoxAdapter(
-                  child: Container(
-                    padding: EdgeInsets.symmetric(vertical: 20.h),
-                    margin: EdgeInsets.symmetric(horizontal: 20.w),
-                    child: Center(
-                      child: Shimmer.fromColors(
-                        baseColor: Colors.grey.shade300,
-                        highlightColor: Colors.grey.shade100,
-                        child: Container(
-                          width: double.infinity,
-                          height: 200.h,
-                          color: Colors.white,
-                        ),
-                      ),
-                    ),
-                  ),
-                );
-              }
-              final stories = storyController.stories
-                  .where(
-                    (story) => story.category.contains(widget.categoryName),
-                  )
-                  .toList();
-
-              if (stories.isEmpty) {
-                return SliverToBoxAdapter(
-                  child: Padding(
-                    padding: EdgeInsets.all(20.w),
-                    child: Text(
-                      'No stories found for ${widget.categoryName}',
-                      style: appStyle(14, kGray, FontWeight.w500),
-                    ),
-                  ),
-                );
-              }
-
-              return SliverPadding(
+            // Content Section
+            SliverToBoxAdapter(
+              child: Padding(
                 padding: EdgeInsets.symmetric(horizontal: 20.w),
-                sliver: SliverGrid(
-                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 2,
-                    mainAxisSpacing: 15.h,
-                    crossAxisSpacing: 15.w,
-                    childAspectRatio: 0.75,
-                  ),
-                  delegate: SliverChildBuilderDelegate((context, index) {
-                    final story = stories[index];
-                    return TopStoryCard(
-                      index: index,
-                      category: widget.categoryName,
-                      color: widget.categoryColor,
-                      story: story,
-                    );
-                  }, childCount: stories.length),
-                ),
-              );
-            },
-          ),
-
-          // Popular Experiences Section
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 20.h),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        'Posts',
-                        style: appStyle(20, kDark, FontWeight.bold),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    SizedBox(height: 20.h),
+                    // Category Description
+                    Text(
+                      _getCategoryDescription(widget.categoryName),
+                      style: appStyle(
+                        16,
+                        kDark.withOpacity(0.8),
+                        FontWeight.normal,
                       ),
-                      TextButton(
-                        onPressed: () {},
-                        child: Text(
-                          'View all',
-                          style: appStyle(14, kSecondary, FontWeight.w600),
+                    ),
+                    SizedBox(height: 20.h),
+                    // Section Title with View All
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          'Stories',
+                          style: appStyle(20, kDark, FontWeight.bold),
+                        ),
+                        TextButton(
+                          onPressed: () {},
+                          child: Text(
+                            'View all',
+                            style: appStyle(14, kSecondary, FontWeight.w600),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            // Top stories Grid
+            GetBuilder<StoryController>(
+              init: StoryController(),
+              builder: (storyController) {
+                if (storyController.isLoading) {
+                  return SliverToBoxAdapter(
+                    child: Container(
+                      padding: EdgeInsets.symmetric(vertical: 20.h),
+                      margin: EdgeInsets.symmetric(horizontal: 20.w),
+                      child: Center(
+                        child: Shimmer.fromColors(
+                          baseColor: kCardColor.withOpacity(0.3),
+                          highlightColor: kCardColor.withOpacity(0.1),
+                          child: Container(
+                            width: double.infinity,
+                            height: 200.h,
+                            color: kCardColor,
+                          ),
                         ),
                       ),
-                    ],
+                    ),
+                  );
+                }
+                final stories = storyController.stories
+                    .where(
+                      (story) => story.category.contains(widget.categoryName),
+                    )
+                    .toList();
+
+                if (stories.isEmpty) {
+                  return SliverToBoxAdapter(
+                    child: Padding(
+                      padding: EdgeInsets.all(20.w),
+                      child: Text(
+                        'No stories found for ${widget.categoryName}',
+                        style: appStyle(14, kGray, FontWeight.w500),
+                      ),
+                    ),
+                  );
+                }
+
+                return SliverPadding(
+                  padding: EdgeInsets.symmetric(horizontal: 20.w),
+                  sliver: SliverGrid(
+                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 2,
+                      mainAxisSpacing: 15.h,
+                      crossAxisSpacing: 15.w,
+                      childAspectRatio: 0.75,
+                    ),
+                    delegate: SliverChildBuilderDelegate((context, index) {
+                      final story = stories[index];
+                      return TopStoryCard(
+                        index: index,
+                        category: widget.categoryName,
+                        color: widget.categoryColor,
+                        story: story,
+                      );
+                    }, childCount: stories.length),
                   ),
-                  SizedBox(height: 15.h),
-                  GetBuilder<PostController>(
-                    init: PostController(),
-                    builder: (postController) {
-                      if (postController.isLoading) {
-                        return Container(
-                          padding: EdgeInsets.symmetric(vertical: 20.h),
-                          margin: EdgeInsets.symmetric(horizontal: 20.w),
-                          child: Center(
-                            child: Shimmer.fromColors(
-                              baseColor: Colors.grey.shade300,
-                              highlightColor: Colors.grey.shade100,
-                              child: Container(
-                                width: double.infinity,
-                                height: 200.h,
-                                color: Colors.white,
+                );
+              },
+            ),
+
+            // Popular Experiences Section
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 20.h),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          'Posts',
+                          style: appStyle(20, kDark, FontWeight.bold),
+                        ),
+                        TextButton(
+                          onPressed: () {},
+                          child: Text(
+                            'View all',
+                            style: appStyle(14, kSecondary, FontWeight.w600),
+                          ),
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: 15.h),
+                    GetBuilder<PostController>(
+                      init: PostController(),
+                      builder: (postController) {
+                        if (postController.isLoading) {
+                          return Container(
+                            padding: EdgeInsets.symmetric(vertical: 20.h),
+                            margin: EdgeInsets.symmetric(horizontal: 20.w),
+                            child: Center(
+                              child: Shimmer.fromColors(
+                                baseColor: kCardColor.withOpacity(0.3),
+                                highlightColor: kCardColor.withOpacity(0.1),
+                                child: Container(
+                                  width: double.infinity,
+                                  height: 200.h,
+                                  color: Colors.white,
+                                ),
                               ),
+                            ),
+                          );
+                        }
+                        final posts = postController.posts
+                            .where(
+                              (posts) =>
+                                  posts.category.contains(widget.categoryName),
+                            )
+                            .toList();
+
+                        if (posts.isEmpty) {
+                          return Padding(
+                            padding: EdgeInsets.all(20.w),
+                            child: Text(
+                              'No Posts found for ${widget.categoryName}',
+                              style: appStyle(14, kGray, FontWeight.w500),
+                            ),
+                          );
+                        }
+
+                        return SizedBox(
+                          height: 220.h,
+                          child: ListView.builder(
+                            scrollDirection: Axis.horizontal,
+                            itemCount: posts.length,
+                            itemBuilder: (context, index) => PopularPostCard(
+                              index: index,
+                              category: widget.categoryName,
+                              color: widget.categoryColor,
+                              posts: posts,
                             ),
                           ),
                         );
-                      }
-                      final posts = postController.posts
-                          .where(
-                            (posts) =>
-                                posts.category.contains(widget.categoryName),
-                          )
-                          .toList();
-
-                      if (posts.isEmpty) {
-                        return Padding(
-                          padding: EdgeInsets.all(20.w),
-                          child: Text(
-                            'No Posts found for ${widget.categoryName}',
-                            style: appStyle(14, kGray, FontWeight.w500),
-                          ),
-                        );
-                      }
-
-                      return SizedBox(
-                        height: 220.h,
-                        child: ListView.builder(
-                          scrollDirection: Axis.horizontal,
-                          itemCount: posts.length,
-                          itemBuilder: (context, index) => PopularPostCard(
-                            index: index,
-                            category: widget.categoryName,
-                            color: widget.categoryColor,
-                            posts: posts,
-                          ),
-                        ),
-                      );
-                    },
-                  ),
-                ],
+                      },
+                    ),
+                  ],
+                ),
               ),
             ),
-          ),
 
-          // Travel Tips Section
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 10.h),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Travel Tips',
-                    style: appStyle(20, kDark, FontWeight.bold),
-                  ),
-                  SizedBox(height: 15.h),
-                  _TravelTipCard(
-                    tip: _getTravelTip(widget.categoryName, 0),
-                    icon: Icons.calendar_today,
-                    color: widget.categoryColor,
-                  ),
-                  SizedBox(height: 10.h),
-                  _TravelTipCard(
-                    tip: _getTravelTip(widget.categoryName, 1),
-                    icon: Icons.attach_money,
-                    color: widget.categoryColor,
-                  ),
-                ],
+            // Travel Tips Section
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 10.h),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Travel Tips',
+                      style: appStyle(20, kDark, FontWeight.bold),
+                    ),
+                    SizedBox(height: 15.h),
+                    _TravelTipCard(
+                      tip: _getTravelTip(widget.categoryName, 0),
+                      icon: Icons.calendar_today,
+                      color: widget.categoryColor,
+                    ),
+                    SizedBox(height: 10.h),
+                    _TravelTipCard(
+                      tip: _getTravelTip(widget.categoryName, 1),
+                      icon: Icons.attach_money,
+                      color: widget.categoryColor,
+                    ),
+                  ],
+                ),
               ),
             ),
-          ),
-          SliverToBoxAdapter(child: SizedBox(height: 40.h)),
-        ],
+            SliverToBoxAdapter(child: SizedBox(height: 40.h)),
+          ],
+        ),
       ),
     );
   }
@@ -411,7 +423,7 @@ class _TravelTipCard extends StatelessWidget {
     return Container(
       padding: EdgeInsets.all(15.w),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: kCardColor,
         borderRadius: BorderRadius.circular(15.r),
         boxShadow: [
           BoxShadow(

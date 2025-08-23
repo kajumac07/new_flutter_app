@@ -3,6 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:new_flutter_app/app/core/constants/constdata.dart';
 import 'package:new_flutter_app/app/core/utils/app_styles.dart';
+import 'package:new_flutter_app/app/global/widgets/custom_container.dart';
 import 'package:new_flutter_app/app/presentation/auth/register/register_screen.dart';
 import 'package:lottie/lottie.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
@@ -44,121 +45,123 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // backgroundColor: kRed,
-      body: Stack(
-        children: [
-          // Curved Top Left
-          Positioned(
-            top: 0,
-            left: 0,
-            child: ClipPath(
-              clipper: TopLeftCurveClipper(),
-              child: Container(
-                width: 200.w,
-                height: 200.h,
-                color: kPrimary.withOpacity(0.2),
+      // backgroundColor: kCardColor,
+      body: CustomGradientContainer(
+        child: Stack(
+          children: [
+            // Curved Top Left
+            // Positioned(
+            //   top: 0,
+            //   left: 0,
+            //   child: ClipPath(
+            //     clipper: TopLeftCurveClipper(),
+            //     child: Container(
+            //       width: 200.w,
+            //       height: 200.h,
+            //       color: kPrimary.withOpacity(0.2),
+            //     ),
+            //   ),
+            // ),
+
+            // // Curved Bottom Right
+            // Positioned(
+            //   bottom: 0,
+            //   right: 0,
+            //   child: ClipPath(
+            //     clipper: BottomRightCurveClipper(),
+            //     child: Container(
+            //       width: 250.w,
+            //       height: 250.h,
+            //       color: kSecondary.withOpacity(0.2),
+            //     ),
+            //   ),
+            // ),
+
+            // PageView
+            PageView.builder(
+              controller: _pageController,
+              itemCount: _onboardingItems.length,
+              onPageChanged: (index) {
+                setState(() {
+                  _currentPage = index;
+                });
+              },
+              itemBuilder: (context, index) {
+                return _buildOnboardingPage(_onboardingItems[index]);
+              },
+            ),
+
+            // Bottom Section
+            Positioned(
+              bottom: 20.h,
+              left: 0,
+              right: 0,
+              child: Column(
+                children: [
+                  SmoothPageIndicator(
+                    controller: _pageController,
+                    count: _onboardingItems.length,
+                    effect: ExpandingDotsEffect(
+                      activeDotColor: kSecondary,
+                      dotColor: kDark,
+                      dotHeight: 8.h,
+                      dotWidth: 8.w,
+                      spacing: 8.w,
+                    ),
+                  ),
+                  SizedBox(height: 30.h),
+                  Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 40.w),
+                    child: ElevatedButton(
+                      onPressed: () {
+                        if (_currentPage < _onboardingItems.length - 1) {
+                          _pageController.nextPage(
+                            duration: const Duration(milliseconds: 500),
+                            curve: Curves.easeInOut,
+                          );
+                        } else {
+                          Get.offAll(() => RegisterScreen());
+                        }
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: kSecondary,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(50.r),
+                        ),
+                        padding: EdgeInsets.symmetric(
+                          vertical: 15.h,
+                          horizontal: 40.w,
+                        ),
+                        elevation: 6,
+                      ),
+                      child: Text(
+                        _currentPage == _onboardingItems.length - 1
+                            ? "Get Started"
+                            : "Next",
+                        style: TextStyle(
+                          fontSize: 16.sp,
+                          fontWeight: FontWeight.w600,
+                          color: kWhite,
+                        ),
+                      ),
+                    ),
+                  ),
+                  SizedBox(height: 10.h),
+                  if (_currentPage != _onboardingItems.length - 1)
+                    TextButton(
+                      onPressed: () {
+                        _pageController.jumpToPage(_onboardingItems.length - 1);
+                      },
+                      child: Text(
+                        "Skip",
+                        style: appStyle(14, kDark, FontWeight.w200),
+                      ),
+                    ),
+                ],
               ),
             ),
-          ),
-
-          // Curved Bottom Right
-          Positioned(
-            bottom: 0,
-            right: 0,
-            child: ClipPath(
-              clipper: BottomRightCurveClipper(),
-              child: Container(
-                width: 250.w,
-                height: 250.h,
-                color: kSecondary.withOpacity(0.2),
-              ),
-            ),
-          ),
-
-          // PageView
-          PageView.builder(
-            controller: _pageController,
-            itemCount: _onboardingItems.length,
-            onPageChanged: (index) {
-              setState(() {
-                _currentPage = index;
-              });
-            },
-            itemBuilder: (context, index) {
-              return _buildOnboardingPage(_onboardingItems[index]);
-            },
-          ),
-
-          // Bottom Section
-          Positioned(
-            bottom: 20.h,
-            left: 0,
-            right: 0,
-            child: Column(
-              children: [
-                SmoothPageIndicator(
-                  controller: _pageController,
-                  count: _onboardingItems.length,
-                  effect: ExpandingDotsEffect(
-                    activeDotColor: kSecondary,
-                    dotColor: kDark,
-                    dotHeight: 8.h,
-                    dotWidth: 8.w,
-                    spacing: 8.w,
-                  ),
-                ),
-                SizedBox(height: 30.h),
-                Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 40.w),
-                  child: ElevatedButton(
-                    onPressed: () {
-                      if (_currentPage < _onboardingItems.length - 1) {
-                        _pageController.nextPage(
-                          duration: const Duration(milliseconds: 500),
-                          curve: Curves.easeInOut,
-                        );
-                      } else {
-                        Get.offAll(() => RegisterScreen());
-                      }
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: kSecondary,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(50.r),
-                      ),
-                      padding: EdgeInsets.symmetric(
-                        vertical: 15.h,
-                        horizontal: 40.w,
-                      ),
-                      elevation: 6,
-                    ),
-                    child: Text(
-                      _currentPage == _onboardingItems.length - 1
-                          ? "Get Started"
-                          : "Next",
-                      style: TextStyle(
-                        fontSize: 16.sp,
-                        fontWeight: FontWeight.w600,
-                        color: kWhite,
-                      ),
-                    ),
-                  ),
-                ),
-                SizedBox(height: 10.h),
-                if (_currentPage != _onboardingItems.length - 1)
-                  TextButton(
-                    onPressed: () {
-                      _pageController.jumpToPage(_onboardingItems.length - 1);
-                    },
-                    child: Text(
-                      "Skip",
-                      style: appStyle(14, kDark, FontWeight.w200),
-                    ),
-                  ),
-              ],
-            ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

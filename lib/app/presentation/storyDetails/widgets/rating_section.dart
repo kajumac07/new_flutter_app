@@ -20,7 +20,7 @@ class RatingsSection extends StatelessWidget {
           style: GoogleFonts.lato(
             fontSize: 22.sp,
             fontWeight: FontWeight.w700,
-            color: Colors.black87,
+            color: kWhite,
           ),
         ),
         SizedBox(height: 8.h),
@@ -28,7 +28,7 @@ class RatingsSection extends StatelessWidget {
           width: 40.w,
           height: 3.h,
           decoration: BoxDecoration(
-            gradient: const LinearGradient(colors: [kPrimary, kPrimary]),
+            gradient: const LinearGradient(colors: [kSecondary, kSecondary]),
             borderRadius: BorderRadius.circular(3.r),
           ),
         ),
@@ -36,15 +36,8 @@ class RatingsSection extends StatelessWidget {
         Container(
           padding: EdgeInsets.all(20.w),
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: kCardColor,
             borderRadius: BorderRadius.circular(16.r),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.05),
-                blurRadius: 20,
-                offset: const Offset(0, 10),
-              ),
-            ],
           ),
           child: Column(
             children: [
@@ -106,7 +99,7 @@ class _RatingItem extends StatelessWidget {
                   category,
                   style: GoogleFonts.poppins(
                     fontSize: 14.sp,
-                    color: Colors.grey[700],
+                    color: kWhite,
                     fontWeight: FontWeight.w500,
                   ),
                 ),

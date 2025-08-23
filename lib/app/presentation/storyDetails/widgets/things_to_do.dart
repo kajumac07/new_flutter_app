@@ -18,7 +18,7 @@ class ThingsToDoSection extends StatelessWidget {
           style: GoogleFonts.lato(
             fontSize: 22.sp,
             fontWeight: FontWeight.w700,
-            color: Colors.black87,
+            color: kWhite,
           ),
         ),
         SizedBox(height: 8.h),
@@ -26,7 +26,7 @@ class ThingsToDoSection extends StatelessWidget {
           width: 40.w,
           height: 3.h,
           decoration: BoxDecoration(
-            gradient: const LinearGradient(colors: [kPrimary, kPrimary]),
+            gradient: const LinearGradient(colors: [kSecondary, kSecondary]),
             borderRadius: BorderRadius.circular(3.r),
           ),
         ),

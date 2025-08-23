@@ -14,7 +14,7 @@ class StoryMetadataCard extends StatelessWidget {
     return Container(
       padding: EdgeInsets.all(20.w),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: kCardColor,
         borderRadius: BorderRadius.circular(16.r),
         boxShadow: [
           BoxShadow(
@@ -32,7 +32,7 @@ class StoryMetadataCard extends StatelessWidget {
             style: GoogleFonts.poppins(
               fontSize: 28.sp,
               fontWeight: FontWeight.w700,
-              color: Colors.black87,
+              color: kDark,
               height: 1.3,
             ),
           ),
@@ -48,14 +48,14 @@ class StoryMetadataCard extends StatelessWidget {
                         Icon(
                           Icons.calendar_today,
                           size: 16.sp,
-                          color: Colors.blueAccent,
+                          color: kSecondary,
                         ),
                         SizedBox(width: 8.w),
                         Text(
                           "${_formatDate(story.startDate.toDate())} - ${_formatDate(story.endDate.toDate())}",
                           style: GoogleFonts.poppins(
                             fontSize: 13.sp,
-                            color: Colors.grey[600],
+                            color: kDark.withOpacity(0.7),
                             fontWeight: FontWeight.w500,
                           ),
                         ),
@@ -64,17 +64,13 @@ class StoryMetadataCard extends StatelessWidget {
                     SizedBox(height: 8.h),
                     Row(
                       children: [
-                        Icon(
-                          Icons.category,
-                          size: 16.sp,
-                          color: Colors.blueAccent,
-                        ),
+                        Icon(Icons.category, size: 16.sp, color: kSecondary),
                         SizedBox(width: 8.w),
                         Text(
                           story.category,
                           style: GoogleFonts.poppins(
                             fontSize: 13.sp,
-                            color: Colors.grey[600],
+                            color: kDark.withOpacity(0.7),
                             fontWeight: FontWeight.w500,
                           ),
                         ),

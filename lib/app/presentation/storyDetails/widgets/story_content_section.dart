@@ -39,7 +39,7 @@ class StoryContentSection extends StatelessWidget {
           style: GoogleFonts.lato(
             fontSize: 22.sp,
             fontWeight: FontWeight.w700,
-            color: Colors.black87,
+            color: kDark,
           ),
         ),
         SizedBox(height: 8.h),
@@ -47,7 +47,7 @@ class StoryContentSection extends StatelessWidget {
           width: 40.w,
           height: 3.h,
           decoration: BoxDecoration(
-            gradient: const LinearGradient(colors: [kPrimary, kPrimary]),
+            gradient: const LinearGradient(colors: [kSecondary, kSecondary]),
             borderRadius: BorderRadius.circular(3.r),
           ),
         ),
@@ -75,7 +75,7 @@ class StoryContentSection extends StatelessWidget {
       style: GoogleFonts.poppins(
         fontSize: 15.sp,
         height: 1.8,
-        color: Colors.grey[700],
+        color: kWhite.withOpacity(0.7),
       ),
     );
   }

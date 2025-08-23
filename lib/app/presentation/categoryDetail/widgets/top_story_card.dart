@@ -39,7 +39,7 @@ class TopStoryCard extends StatelessWidget {
       },
       child: Container(
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: kCardColor,
           borderRadius: BorderRadius.circular(15.r),
           boxShadow: [
             BoxShadow(
@@ -145,9 +145,10 @@ class TopStoryCard extends StatelessWidget {
                         style: appStyle(12, kGray, FontWeight.normal),
                       ),
                       Spacer(),
-                      Icon(Icons.star, size: 14.sp, color: Colors.amber),
-                      SizedBox(width: 3.w),
-                      Text('4.5 ', style: appStyle(12, kDark, FontWeight.w500)),
+
+                      Icon(Icons.star, size: 10.sp, color: Colors.amber),
+                      // SizedBox(width: 3.w),
+                      Text('4.5 ', style: appStyle(10, kDark, FontWeight.w500)),
                     ],
                   ),
                   SizedBox(height: 10.h),

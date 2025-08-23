@@ -18,7 +18,7 @@ class CommentsSection extends StatelessWidget {
           style: GoogleFonts.lato(
             fontSize: 22.sp,
             fontWeight: FontWeight.w700,
-            color: Colors.black87,
+            color: kWhite,
           ),
         ),
         SizedBox(height: 8.h),
@@ -26,7 +26,7 @@ class CommentsSection extends StatelessWidget {
           width: 40.w,
           height: 3.h,
           decoration: BoxDecoration(
-            gradient: const LinearGradient(colors: [kPrimary, kPrimary]),
+            gradient: const LinearGradient(colors: [kSecondary, kSecondary]),
             borderRadius: BorderRadius.circular(3.r),
           ),
         ),
@@ -34,20 +34,17 @@ class CommentsSection extends StatelessWidget {
         Container(
           padding: EdgeInsets.all(20.w),
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: kCardColor,
             borderRadius: BorderRadius.circular(16.r),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.05),
-                blurRadius: 20,
-                offset: const Offset(0, 10),
-              ),
-            ],
           ),
           child: comments.isEmpty
               ? Column(
                   children: [
-                    Icon(Icons.comment, size: 40.sp, color: Colors.grey[400]),
+                    Icon(
+                      Icons.comment,
+                      size: 40.sp,
+                      color: Colors.white.withOpacity(0.7),
+                    ),
                     SizedBox(height: 16.h),
                     Text(
                       "No comments yet",

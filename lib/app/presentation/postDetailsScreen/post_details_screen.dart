@@ -7,6 +7,7 @@ import 'package:iconsax/iconsax.dart';
 import 'package:new_flutter_app/app/core/constants/constdata.dart';
 import 'package:new_flutter_app/app/core/services/collection_refrence.dart';
 import 'package:new_flutter_app/app/global/models/post_model.dart';
+import 'package:new_flutter_app/app/global/widgets/custom_container.dart';
 import 'package:new_flutter_app/app/presentation/storyDetails/widgets/gallery_section.dart';
 import 'package:timeago/timeago.dart' as timeago;
 
@@ -186,60 +187,66 @@ class _PostDetailsScreenState extends State<PostDetailsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey[50],
-      body: CustomScrollView(
-        slivers: [
-          SliverAppBar(
-            expandedHeight: 350.h,
-            flexibleSpace: FlexibleSpaceBar(background: _buildPostImage()),
-            pinned: true,
-            elevation: 0,
-            backgroundColor: Colors.transparent,
-            leading: Padding(
-              padding: EdgeInsets.all(8.w),
-              child: CircleAvatar(
-                backgroundColor: Colors.black26,
-                child: IconButton(
-                  icon: Icon(Icons.arrow_back, color: Colors.white),
-                  onPressed: () => Get.back(),
-                ),
-              ),
-            ),
-            actions: [
-              Padding(
+      // backgroundColor: kCardColor,
+      body: CustomGradientContainer(
+        child: CustomScrollView(
+          slivers: [
+            SliverAppBar(
+              expandedHeight: 350.h,
+              flexibleSpace: FlexibleSpaceBar(background: _buildPostImage()),
+              pinned: true,
+              elevation: 0,
+              backgroundColor: Colors.transparent,
+              leading: Padding(
                 padding: EdgeInsets.all(8.w),
                 child: CircleAvatar(
-                  backgroundColor: Colors.black26,
+                  backgroundColor: kCardColor,
                   child: IconButton(
-                    icon: Icon(Iconsax.share, color: Colors.white, size: 20.w),
-                    onPressed: _sharePost,
+                    icon: Icon(Icons.arrow_back, color: Colors.white),
+                    onPressed: () => Get.back(),
                   ),
                 ),
               ),
-            ],
-          ),
+              actions: [
+                Padding(
+                  padding: EdgeInsets.all(8.w),
+                  child: CircleAvatar(
+                    backgroundColor: kCardColor,
+                    child: IconButton(
+                      icon: Icon(
+                        Iconsax.share,
+                        color: Colors.white,
+                        size: 20.w,
+                      ),
+                      onPressed: _sharePost,
+                    ),
+                  ),
+                ),
+              ],
+            ),
 
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: EdgeInsets.symmetric(horizontal: 20.w),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  SizedBox(height: 15.h),
-                  _buildPostHeader(),
-                  SizedBox(height: 20.h),
-                  _buildPostContent(),
-                  SizedBox(height: 25.h),
-                  EnhancedGallerySection(images: widget.post.media),
-                  SizedBox(height: 25.h),
-                  _buildInteractionStats(),
-                  SizedBox(height: 30.h),
-                  _buildCommentsSection(),
-                ],
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: EdgeInsets.symmetric(horizontal: 20.w),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    SizedBox(height: 15.h),
+                    _buildPostHeader(),
+                    SizedBox(height: 20.h),
+                    _buildPostContent(),
+                    SizedBox(height: 25.h),
+                    EnhancedGallerySection(images: widget.post.media),
+                    SizedBox(height: 25.h),
+                    _buildInteractionStats(),
+                    SizedBox(height: 30.h),
+                    _buildCommentsSection(),
+                  ],
+                ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
       bottomNavigationBar: _buildCommentInput(),
     );
@@ -303,14 +310,18 @@ class _PostDetailsScreenState extends State<PostDetailsScreen> {
             children: [
               Text(
                 '$userName$authorTag',
-                style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w600),
+                style: TextStyle(
+                  fontSize: 16.sp,
+                  fontWeight: FontWeight.w600,
+                  color: kWhite,
+                ),
               ),
               SizedBox(height: 4.h),
               Text(
                 timeago.format(
                   widget.post.createdAt?.toDate() ?? DateTime.now(),
                 ),
-                style: TextStyle(color: Colors.grey[600], fontSize: 12.sp),
+                style: TextStyle(color: kWhite.withAlpha(200), fontSize: 12.sp),
               ),
             ],
           ),
@@ -336,6 +347,7 @@ class _PostDetailsScreenState extends State<PostDetailsScreen> {
             fontSize: 22.sp,
             fontWeight: FontWeight.bold,
             height: 1.4,
+            color: kWhite,
           ),
         ),
         SizedBox(height: 12.h),
@@ -346,8 +358,12 @@ class _PostDetailsScreenState extends State<PostDetailsScreen> {
             children: widget.post.category
                 .map(
                   (category) => Chip(
-                    label: Text(category, style: TextStyle(fontSize: 12.sp)),
-                    backgroundColor: Colors.blue.withOpacity(0.1),
+                    label: Text(
+                      category,
+                      style: TextStyle(fontSize: 12.sp, color: kWhite),
+                    ),
+                    backgroundColor: kCardColor,
+                    side: BorderSide(color: kCardColor),
                     visualDensity: VisualDensity.compact,
                   ),
                 )
@@ -356,21 +372,17 @@ class _PostDetailsScreenState extends State<PostDetailsScreen> {
         SizedBox(height: 16.h),
         Text(
           widget.post.description,
-          style: TextStyle(
-            fontSize: 16.sp,
-            height: 1.6,
-            color: Colors.grey[800],
-          ),
+          style: TextStyle(fontSize: 16.sp, height: 1.6, color: kWhite),
         ),
         SizedBox(height: 16.h),
         if (widget.post.location.isNotEmpty)
           Row(
             children: [
-              Icon(Icons.location_on, size: 16.w, color: Colors.grey[600]),
+              Icon(Icons.location_on, size: 16.w, color: kSecondary),
               SizedBox(width: 4.w),
               Text(
                 widget.post.location,
-                style: TextStyle(fontSize: 13.sp, color: Colors.grey[600]),
+                style: TextStyle(fontSize: 13.sp, color: kSecondary),
               ),
             ],
           ),
@@ -382,15 +394,8 @@ class _PostDetailsScreenState extends State<PostDetailsScreen> {
     return Container(
       padding: EdgeInsets.symmetric(vertical: 12.h, horizontal: 16.w),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: kCardColor,
         borderRadius: BorderRadius.circular(12.r),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 8,
-            offset: Offset(0, 4),
-          ),
-        ],
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -426,14 +431,14 @@ class _PostDetailsScreenState extends State<PostDetailsScreen> {
   }) {
     return Column(
       children: [
-        Icon(icon, size: 22.w, color: isActive ? kRed : Colors.grey[600]),
+        Icon(icon, size: 22.w, color: isActive ? kRed : kWhite),
         SizedBox(height: 4.h),
         Text(
           '$count',
           style: TextStyle(
             fontSize: 14.sp,
             fontWeight: FontWeight.w600,
-            color: isActive ? Colors.blue : Colors.grey[600],
+            color: isActive ? kSecondary : kWhite,
           ),
         ),
         SizedBox(height: 2.h),
@@ -451,7 +456,11 @@ class _PostDetailsScreenState extends State<PostDetailsScreen> {
       children: [
         Text(
           'Comments (${comments.length})',
-          style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold),
+          style: TextStyle(
+            fontSize: 18.sp,
+            fontWeight: FontWeight.bold,
+            color: kWhite,
+          ),
         ),
         SizedBox(height: 16.h),
         if (comments.isEmpty)
@@ -489,19 +498,12 @@ class _PostDetailsScreenState extends State<PostDetailsScreen> {
                 Container(
                   padding: EdgeInsets.all(12.w),
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: kCardColor,
                     borderRadius: BorderRadius.only(
                       topRight: Radius.circular(12.r),
                       bottomLeft: Radius.circular(12.r),
                       bottomRight: Radius.circular(12.r),
                     ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.05),
-                        blurRadius: 6,
-                        offset: Offset(0, 3),
-                      ),
-                    ],
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -511,12 +513,17 @@ class _PostDetailsScreenState extends State<PostDetailsScreen> {
                         style: TextStyle(
                           fontWeight: FontWeight.w600,
                           fontSize: 14.sp,
+                          color: kWhite,
                         ),
                       ),
                       SizedBox(height: 4.h),
                       Text(
                         comment['text'],
-                        style: TextStyle(fontSize: 14.sp, height: 1.4),
+                        style: TextStyle(
+                          fontSize: 14.sp,
+                          height: 1.4,
+                          color: kWhite.withOpacity(0.7),
+                        ),
                       ),
                     ],
                   ),
@@ -528,7 +535,7 @@ class _PostDetailsScreenState extends State<PostDetailsScreen> {
                     timeago.format(
                       (comment['timestamp'] as Timestamp).toDate(),
                     ),
-                    style: TextStyle(color: Colors.grey[500], fontSize: 11.sp),
+                    style: TextStyle(color: kWhite, fontSize: 11.sp),
                   ),
                 ),
               ],
@@ -543,8 +550,8 @@ class _PostDetailsScreenState extends State<PostDetailsScreen> {
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
       decoration: BoxDecoration(
-        color: Colors.white,
-        border: Border(top: BorderSide(color: Colors.grey[200]!)),
+        color: kCardColor,
+        border: Border(top: BorderSide(color: kCardColor)),
       ),
       child: Row(
         children: [
@@ -557,7 +564,7 @@ class _PostDetailsScreenState extends State<PostDetailsScreen> {
             child: Container(
               padding: EdgeInsets.symmetric(horizontal: 16.w),
               decoration: BoxDecoration(
-                color: Colors.grey[100],
+                color: kWhite.withOpacity(0.6),
                 borderRadius: BorderRadius.circular(24.r),
               ),
               child: TextField(
@@ -566,7 +573,7 @@ class _PostDetailsScreenState extends State<PostDetailsScreen> {
                   hintText: 'Write a comment...',
                   border: InputBorder.none,
                   suffixIcon: IconButton(
-                    icon: Icon(Icons.send, color: Colors.blue),
+                    icon: Icon(Icons.send, color: kSecondary),
                     onPressed: _postComment,
                   ),
                 ),

@@ -34,7 +34,7 @@ class PopularPostCard extends StatelessWidget {
         width: 250.w,
         margin: EdgeInsets.only(right: 15.w),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: kCardColor,
           borderRadius: BorderRadius.circular(15.r),
           boxShadow: [
             BoxShadow(
