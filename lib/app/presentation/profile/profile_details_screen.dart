@@ -10,6 +10,7 @@ import 'package:new_flutter_app/app/core/services/collection_refrence.dart';
 import 'package:new_flutter_app/app/global/controller/profile_controller.dart';
 import 'package:new_flutter_app/app/global/widgets/custom_container.dart';
 import 'package:new_flutter_app/app/presentation/profile/widgets/story_lists.dart';
+import 'package:new_flutter_app/app/presentation/profile/widgets/user_lists_bottom_sheet.dart';
 import 'package:shimmer/shimmer.dart';
 
 class UserProfileScreen extends StatefulWidget {
@@ -203,16 +204,68 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                                             MainAxisAlignment.spaceAround,
                                         children: [
                                           _buildStatItem(
+                                            onTap: () {},
                                             user.posts.length.toString(),
                                             'Posts',
                                           ),
+
                                           _buildStatItem(
                                             user.followers.length.toString(),
                                             'Followers',
+                                            onTap: () {
+                                              showModalBottomSheet(
+                                                context: context,
+                                                isScrollControlled: true,
+                                                backgroundColor: kCardColor,
+                                                shape:
+                                                    const RoundedRectangleBorder(
+                                                      borderRadius:
+                                                          BorderRadius.vertical(
+                                                            top:
+                                                                Radius.circular(
+                                                                  20,
+                                                                ),
+                                                          ),
+                                                    ),
+                                                builder: (context) =>
+                                                    UsersListBottomSheet(
+                                                      userIds: user.followers,
+                                                      title: "Followers",
+                                                    ),
+                                              );
+                                            },
                                           ),
                                           _buildStatItem(
                                             user.following.length.toString(),
                                             'Following',
+                                            onTap: () {
+                                              showModalBottomSheet(
+                                                context: context,
+                                                isScrollControlled: true,
+                                                backgroundColor: kCardColor,
+                                                shape:
+                                                    const RoundedRectangleBorder(
+                                                      borderRadius:
+                                                          BorderRadius.vertical(
+                                                            top:
+                                                                Radius.circular(
+                                                                  20,
+                                                                ),
+                                                          ),
+                                                    ),
+                                                builder: (context) =>
+                                                    UsersListBottomSheet(
+                                                      userIds: user.following,
+                                                      title: "Following",
+                                                    ),
+                                              );
+                                            },
+                                          ),
+
+                                          _buildStatItem(
+                                            onTap: () {},
+                                            user.stories.length.toString(),
+                                            'Stories',
                                           ),
                                         ],
                                       ),
@@ -319,23 +372,26 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
   }
 
   // Keep your existing _buildStatItem, _buildFeaturedStory, and _buildRecentPost methods
-  Widget _buildStatItem(String value, String label) {
-    return Column(
-      children: [
-        Text(
-          value,
-          style: TextStyle(
-            fontSize: 18.sp,
-            fontWeight: FontWeight.bold,
-            color: kSecondary,
+  Widget _buildStatItem(String value, String label, {VoidCallback? onTap}) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Column(
+        children: [
+          Text(
+            value,
+            style: TextStyle(
+              fontSize: 18.sp,
+              fontWeight: FontWeight.bold,
+              color: kSecondary,
+            ),
           ),
-        ),
-        SizedBox(height: 5.h),
-        Text(
-          label,
-          style: TextStyle(fontSize: 14.sp, color: kGray),
-        ),
-      ],
+          SizedBox(height: 5.h),
+          Text(
+            label,
+            style: TextStyle(fontSize: 14.sp, color: kGray),
+          ),
+        ],
+      ),
     );
   }
 
