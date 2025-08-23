@@ -2,6 +2,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
+import 'package:new_flutter_app/app/global/widgets/custom_container.dart';
 import 'package:new_flutter_app/app/global/widgets/glowing_icon_button.dart';
 import 'package:new_flutter_app/app/presentation/categoryDetail/category_detail_screen.dart';
 import 'package:new_flutter_app/app/presentation/cloudNotificationScreen/cloud_notification_screen.dart';
@@ -16,393 +17,442 @@ class ExploreScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: kLightWhite,
-      appBar: AppBar(
-        elevation: 0,
-        title: Text('Discover', style: appStyle(24, kDark, FontWeight.bold)),
-        centerTitle: true,
-        actions: [
-          GlowingIconButton(
-            icon: Icons.notifications,
-            badge: true,
-            onTap: () => Get.to(() => CloudNotificationScreen()),
-          ),
+      backgroundColor: Colors.transparent,
 
-          SizedBox(width: 5.w),
-          GlowingIconButton(
-            icon: Icons.person,
-            onTap: () => Get.to(() => UserProfileScreen()),
-          ),
-          SizedBox(width: 5.w),
-        ],
-      ),
-      body: CustomScrollView(
-        physics: const BouncingScrollPhysics(),
-        slivers: [
-          // Search Bar with Gradient Background
-          SliverToBoxAdapter(
-            child: Container(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [kSecondary.withOpacity(0.1), Colors.transparent],
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
+      // appBar: AppBar(
+      //   elevation: 0,
+      //   title: Text('Discover', style: appStyle(24, kDark, FontWeight.bold)),
+      //   centerTitle: true,
+      //   backgroundColor: Colors.transparent,
+      //   actions: [
+      //     GlowingIconButton(
+      //       icon: Icons.notifications,
+      //       badge: true,
+      //       onTap: () => Get.to(() => CloudNotificationScreen()),
+      //     ),
+
+      //     SizedBox(width: 5.w),
+      //     GlowingIconButton(
+      //       icon: Icons.person,
+      //       onTap: () => Get.to(() => UserProfileScreen()),
+      //     ),
+      //     SizedBox(width: 5.w),
+      //   ],
+      // ),
+      body: CustomGradientContainer(
+        child: CustomScrollView(
+          physics: const BouncingScrollPhysics(),
+          slivers: [
+            // 1. Cosmic App Bar
+            SliverAppBar(
+              expandedHeight: 130.h,
+              floating: true,
+              pinned: false,
+              snap: true,
+              stretch: true,
+              backgroundColor: Colors.transparent,
+              flexibleSpace: FlexibleSpaceBar(
+                collapseMode: CollapseMode.pin,
+                title: Text(
+                  'Explore',
+                  style: appStyle(
+                    25,
+                    kWhite,
+                    FontWeight.w900,
+                  ).copyWith(letterSpacing: 1.5),
+                ),
+                centerTitle: true,
+              ),
+
+              actions: [
+                GlowingIconButton(
+                  icon: Icons.notifications,
+                  badge: true,
+                  onTap: () => Get.to(() => CloudNotificationScreen()),
+                ),
+
+                SizedBox(width: 5.w),
+                GlowingIconButton(
+                  icon: Icons.person,
+                  onTap: () => Get.to(
+                    () => UserProfileScreen(),
+                    transition: Transition.rightToLeftWithFade,
+                    duration: Duration(milliseconds: 500),
+                  ),
+                ),
+                SizedBox(width: 5.w),
+              ],
+            ),
+
+            // Search Bar with Gradient Background
+            SliverToBoxAdapter(
+              child: Container(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [kSecondary.withOpacity(0.1), Colors.transparent],
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                  ),
+                ),
+                child: Padding(
+                  padding: EdgeInsets.all(20.w),
+                  child: Container(
+                    height: 50.h,
+                    decoration: BoxDecoration(
+                      color: kCardColor,
+                      borderRadius: BorderRadius.circular(15.r),
+                    ),
+                    child: TextField(
+                      decoration: InputDecoration(
+                        prefixIcon: Icon(Icons.search, color: kSecondary),
+                        hintText: 'Search destinations...',
+                        hintStyle: appStyle(
+                          16,
+                          kWhite.withOpacity(0.8),
+                          FontWeight.normal,
+                        ),
+                        border: InputBorder.none,
+                        contentPadding: EdgeInsets.symmetric(vertical: 15.h),
+                      ),
+                    ),
+                  ),
                 ),
               ),
-              child: Padding(
-                padding: EdgeInsets.all(20.w),
+            ),
+
+            // Categories Section with Animated Cards
+            SliverPadding(
+              padding: EdgeInsets.symmetric(horizontal: 20.w),
+              sliver: SliverToBoxAdapter(
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      'Categories',
+                      style: appStyle(20, kDark, FontWeight.bold),
+                    ),
+                    TextButton(
+                      onPressed: () {},
+                      child: Text(
+                        'See all',
+                        style: appStyle(14, kSecondary, FontWeight.w500),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            SliverPadding(
+              padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 10.h),
+              sliver: SliverGrid(
+                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 4,
+                  childAspectRatio: 0.9,
+                  mainAxisSpacing: 10.h,
+                  crossAxisSpacing: 8.w,
+                ),
+                delegate: SliverChildBuilderDelegate((context, index) {
+                  final categories = [
+                    {
+                      'emoji': '⛰️',
+                      'label': 'Mountains',
+                      'color': const Color(0xFF4CAF50),
+                    },
+                    {
+                      'emoji': '🏖️',
+                      'label': 'Beaches',
+                      'color': const Color(0xFF2196F3),
+                    },
+                    {
+                      'emoji': '🏛️',
+                      'label': 'Heritage',
+                      'color': const Color(0xFF9C27B0),
+                    },
+                    {
+                      'emoji': '🏕️',
+                      'label': 'Camping',
+                      'color': const Color(0xFF795548),
+                    },
+                    {
+                      'emoji': '🍜',
+                      'label': 'Food',
+                      'color': const Color(0xFFFF5722),
+                    },
+                    {
+                      'emoji': '🛕',
+                      'label': 'Spiritual',
+                      'color': const Color(0xFFFFC107),
+                    },
+                    {
+                      'emoji': '🛒',
+                      'label': 'Shopping',
+                      'color': const Color(0xFFE91E63),
+                    },
+                    {
+                      'emoji': '🎭',
+                      'label': 'Culture',
+                      'color': const Color(0xFF3F51B5),
+                    },
+                  ];
+                  return _CategoryCard(
+                    emoji: categories[index]['emoji'] as String,
+                    label: categories[index]['label'] as String,
+                    color: categories[index]['color'] as Color,
+                    onTap: () {
+                      Get.to(
+                        () => CategoryDetailScreen(
+                          categoryName: categories[index]['label'] as String,
+                          categoryColor: categories[index]['color'] as Color,
+                          categoryEmoji: categories[index]['emoji'] as String,
+                        ),
+                      );
+                    },
+                  );
+                }, childCount: 8),
+              ),
+            ),
+
+            // Trending Destinations with Parallax Effect
+            SliverPadding(
+              padding: EdgeInsets.only(left: 20.w, top: 20.h, bottom: 10.h),
+              sliver: SliverToBoxAdapter(
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      'Trending Now',
+                      style: appStyle(20, kDark, FontWeight.bold),
+                    ),
+                    TextButton(
+                      onPressed: () {},
+                      child: Text(
+                        'View all',
+                        style: appStyle(14, kSecondary, FontWeight.w500),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            SliverToBoxAdapter(
+              child: SizedBox(
+                height: 240.h, // Increased height for better visuals
+                child: ListView.builder(
+                  scrollDirection: Axis.horizontal,
+                  padding: EdgeInsets.only(left: 20.w, right: 20.w),
+                  itemCount: 5,
+                  itemBuilder: (context, index) {
+                    final destinations = [
+                      {
+                        'image':
+                            'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b',
+                        'title': 'Himalayan Trek',
+                        'location': 'Nepal',
+                        'rating': 4.8,
+                      },
+                      {
+                        'image':
+                            'https://images.unsplash.com/photo-1507525428034-b723cf961d3e',
+                        'title': 'Goa Beaches',
+                        'location': 'India',
+                        'rating': 4.5,
+                      },
+                      {
+                        'image':
+                            'https://images.unsplash.com/photo-1519501025264-65ba15a82390',
+                        'title': 'Tokyo City',
+                        'location': 'Japan',
+                        'rating': 4.9,
+                      },
+                      {
+                        'image':
+                            'https://images.unsplash.com/photo-1506929562872-bb421503ef21',
+                        'title': 'Safari Tour',
+                        'location': 'Kenya',
+                        'rating': 4.7,
+                      },
+                      {
+                        'image':
+                            'https://images.unsplash.com/photo-1538970272646-f61fabb3bfe8',
+                        'title': 'Paris Getaway',
+                        'location': 'France',
+                        'rating': 4.6,
+                      },
+                    ];
+                    return _TrendingDestinationCard(
+                      imageUrl: destinations[index]['image'] as String,
+                      title: destinations[index]['title'] as String,
+                      location: destinations[index]['location'] as String,
+                      rating: destinations[index]['rating'] as double,
+                    );
+                  },
+                ),
+              ),
+            ),
+
+            // Special Offers Banner
+            SliverPadding(
+              padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 20.h),
+              sliver: SliverToBoxAdapter(
                 child: Container(
-                  height: 50.h,
+                  height: 120.h,
                   decoration: BoxDecoration(
-                    color: Colors.white,
                     borderRadius: BorderRadius.circular(15.r),
+                    gradient: LinearGradient(
+                      colors: [
+                        const Color(0xFFFF416C),
+                        const Color(0xFFFF4B2B),
+                      ],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withOpacity(0.05),
-                        blurRadius: 10,
+                        color: Colors.red.withOpacity(0.3),
+                        blurRadius: 15,
                         spreadRadius: 2,
                       ),
                     ],
                   ),
-                  child: TextField(
-                    decoration: InputDecoration(
-                      prefixIcon: Icon(Icons.search, color: kGray),
-                      hintText: 'Search destinations...',
-                      hintStyle: appStyle(16, kGray, FontWeight.normal),
-                      border: InputBorder.none,
-                      contentPadding: EdgeInsets.symmetric(vertical: 15.h),
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ),
-
-          // Categories Section with Animated Cards
-          SliverPadding(
-            padding: EdgeInsets.symmetric(horizontal: 20.w),
-            sliver: SliverToBoxAdapter(
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    'Categories',
-                    style: appStyle(20, kDark, FontWeight.bold),
-                  ),
-                  TextButton(
-                    onPressed: () {},
-                    child: Text(
-                      'See all',
-                      style: appStyle(14, kSecondary, FontWeight.w500),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-          SliverPadding(
-            padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 10.h),
-            sliver: SliverGrid(
-              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 4,
-                childAspectRatio: 0.9,
-                mainAxisSpacing: 10.h,
-                crossAxisSpacing: 8.w,
-              ),
-              delegate: SliverChildBuilderDelegate((context, index) {
-                final categories = [
-                  {
-                    'emoji': '⛰️',
-                    'label': 'Mountains',
-                    'color': const Color(0xFF4CAF50),
-                  },
-                  {
-                    'emoji': '🏖️',
-                    'label': 'Beaches',
-                    'color': const Color(0xFF2196F3),
-                  },
-                  {
-                    'emoji': '🏛️',
-                    'label': 'Heritage',
-                    'color': const Color(0xFF9C27B0),
-                  },
-                  {
-                    'emoji': '🏕️',
-                    'label': 'Camping',
-                    'color': const Color(0xFF795548),
-                  },
-                  {
-                    'emoji': '🍜',
-                    'label': 'Food',
-                    'color': const Color(0xFFFF5722),
-                  },
-                  {
-                    'emoji': '🛕',
-                    'label': 'Spiritual',
-                    'color': const Color(0xFFFFC107),
-                  },
-                  {
-                    'emoji': '🛒',
-                    'label': 'Shopping',
-                    'color': const Color(0xFFE91E63),
-                  },
-                  {
-                    'emoji': '🎭',
-                    'label': 'Culture',
-                    'color': const Color(0xFF3F51B5),
-                  },
-                ];
-                return _CategoryCard(
-                  emoji: categories[index]['emoji'] as String,
-                  label: categories[index]['label'] as String,
-                  color: categories[index]['color'] as Color,
-                  onTap: () {
-                    Get.to(
-                      () => CategoryDetailScreen(
-                        categoryName: categories[index]['label'] as String,
-                        categoryColor: categories[index]['color'] as Color,
-                        categoryEmoji: categories[index]['emoji'] as String,
-                      ),
-                    );
-                  },
-                );
-              }, childCount: 8),
-            ),
-          ),
-
-          // Trending Destinations with Parallax Effect
-          SliverPadding(
-            padding: EdgeInsets.only(left: 20.w, top: 20.h, bottom: 10.h),
-            sliver: SliverToBoxAdapter(
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    'Trending Now',
-                    style: appStyle(20, kDark, FontWeight.bold),
-                  ),
-                  TextButton(
-                    onPressed: () {},
-                    child: Text(
-                      'View all',
-                      style: appStyle(14, kSecondary, FontWeight.w500),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-          SliverToBoxAdapter(
-            child: SizedBox(
-              height: 240.h, // Increased height for better visuals
-              child: ListView.builder(
-                scrollDirection: Axis.horizontal,
-                padding: EdgeInsets.only(left: 20.w, right: 20.w),
-                itemCount: 5,
-                itemBuilder: (context, index) {
-                  final destinations = [
-                    {
-                      'image':
-                          'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b',
-                      'title': 'Himalayan Trek',
-                      'location': 'Nepal',
-                      'rating': 4.8,
-                    },
-                    {
-                      'image':
-                          'https://images.unsplash.com/photo-1507525428034-b723cf961d3e',
-                      'title': 'Goa Beaches',
-                      'location': 'India',
-                      'rating': 4.5,
-                    },
-                    {
-                      'image':
-                          'https://images.unsplash.com/photo-1519501025264-65ba15a82390',
-                      'title': 'Tokyo City',
-                      'location': 'Japan',
-                      'rating': 4.9,
-                    },
-                    {
-                      'image':
-                          'https://images.unsplash.com/photo-1506929562872-bb421503ef21',
-                      'title': 'Safari Tour',
-                      'location': 'Kenya',
-                      'rating': 4.7,
-                    },
-                    {
-                      'image':
-                          'https://images.unsplash.com/photo-1538970272646-f61fabb3bfe8',
-                      'title': 'Paris Getaway',
-                      'location': 'France',
-                      'rating': 4.6,
-                    },
-                  ];
-                  return _TrendingDestinationCard(
-                    imageUrl: destinations[index]['image'] as String,
-                    title: destinations[index]['title'] as String,
-                    location: destinations[index]['location'] as String,
-                    rating: destinations[index]['rating'] as double,
-                  );
-                },
-              ),
-            ),
-          ),
-
-          // Special Offers Banner
-          SliverPadding(
-            padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 20.h),
-            sliver: SliverToBoxAdapter(
-              child: Container(
-                height: 120.h,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(15.r),
-                  gradient: LinearGradient(
-                    colors: [const Color(0xFFFF416C), const Color(0xFFFF4B2B)],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.red.withOpacity(0.3),
-                      blurRadius: 15,
-                      spreadRadius: 2,
-                    ),
-                  ],
-                ),
-                child: Stack(
-                  children: [
-                    Positioned(
-                      right: 20.w,
-                      top: 20.h,
-                      child: Opacity(
-                        opacity: 0.2,
-                        child: Icon(
-                          Icons.airplanemode_active,
-                          size: 80.sp,
-                          color: Colors.white,
+                  child: Stack(
+                    children: [
+                      Positioned(
+                        right: 20.w,
+                        top: 20.h,
+                        child: Opacity(
+                          opacity: 0.2,
+                          child: Icon(
+                            Icons.airplanemode_active,
+                            size: 80.sp,
+                            color: Colors.white,
+                          ),
                         ),
                       ),
-                    ),
-                    Padding(
-                      padding: EdgeInsets.all(20.w),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Summer Special!',
-                            style: appStyle(18, Colors.white, FontWeight.bold),
-                          ),
-                          SizedBox(height: 5.h),
-                          Text(
-                            'Get 30% off on all beach destinations',
-                            style: appStyle(
-                              14,
-                              Colors.white.withOpacity(0.9),
-                              FontWeight.normal,
+                      Padding(
+                        padding: EdgeInsets.all(20.w),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Summer Special!',
+                              style: appStyle(
+                                18,
+                                Colors.white,
+                                FontWeight.bold,
+                              ),
                             ),
-                          ),
-                          Spacer(),
-                          Align(
-                            alignment: Alignment.bottomRight,
-                            child: Container(
-                              padding: EdgeInsets.symmetric(
-                                horizontal: 15.w,
-                                vertical: 5.h,
+                            SizedBox(height: 5.h),
+                            Text(
+                              'Get 30% off on all beach destinations',
+                              style: appStyle(
+                                14,
+                                Colors.white.withOpacity(0.9),
+                                FontWeight.normal,
                               ),
-                              decoration: BoxDecoration(
-                                color: Colors.white,
-                                borderRadius: BorderRadius.circular(20.r),
-                              ),
-                              child: Text(
-                                'Book Now',
-                                style: appStyle(
-                                  12,
-                                  kSecondary,
-                                  FontWeight.bold,
+                            ),
+                            Spacer(),
+                            Align(
+                              alignment: Alignment.bottomRight,
+                              child: Container(
+                                padding: EdgeInsets.symmetric(
+                                  horizontal: 15.w,
+                                  vertical: 5.h,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.circular(20.r),
+                                ),
+                                child: Text(
+                                  'Book Now',
+                                  style: appStyle(
+                                    12,
+                                    kSecondary,
+                                    FontWeight.bold,
+                                  ),
                                 ),
                               ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+
+            // Popular Blogs with Featured Content
+            SliverPadding(
+              padding: EdgeInsets.only(left: 20.w, top: 10.h, bottom: 10.h),
+              sliver: SliverToBoxAdapter(
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      'Featured Travel Stories',
+                      style: appStyle(20, kDark, FontWeight.bold),
+                    ),
+                    TextButton(
+                      onPressed: () {},
+                      child: Text(
+                        'More stories',
+                        style: appStyle(14, kSecondary, FontWeight.w500),
                       ),
                     ),
                   ],
                 ),
               ),
             ),
-          ),
-
-          // Popular Blogs with Featured Content
-          SliverPadding(
-            padding: EdgeInsets.only(left: 20.w, top: 10.h, bottom: 10.h),
-            sliver: SliverToBoxAdapter(
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    'Featured Travel Stories',
-                    style: appStyle(20, kDark, FontWeight.bold),
-                  ),
-                  TextButton(
-                    onPressed: () {},
-                    child: Text(
-                      'More stories',
-                      style: appStyle(14, kSecondary, FontWeight.w500),
-                    ),
-                  ),
-                ],
+            SliverPadding(
+              padding: EdgeInsets.symmetric(horizontal: 20.w),
+              sliver: SliverList(
+                delegate: SliverChildBuilderDelegate((context, index) {
+                  final blogs = [
+                    {
+                      'image':
+                          'https://images.unsplash.com/photo-1501785888041-af3ef285b470',
+                      'title': '10 Hidden Gems in Bali You Must Visit',
+                      'author': 'Sarah Miller',
+                      'likes': '1.2K',
+                      'readTime': '8 min read',
+                      'isFeatured': true,
+                    },
+                    {
+                      'image':
+                          'https://images.unsplash.com/photo-1464037866556-6812c9d1c72e',
+                      'title':
+                          'Ultimate Road Trip Through Italy: A 2-Week Itinerary',
+                      'author': 'Marco Rossi',
+                      'likes': '2.4K',
+                      'readTime': '12 min read',
+                      'isFeatured': false,
+                    },
+                    {
+                      'image':
+                          'https://images.unsplash.com/photo-1527631746610-bca00a040d60',
+                      'title': 'Backpacking Southeast Asia on a Budget',
+                      'author': 'Lisa Wong',
+                      'likes': '3.1K',
+                      'readTime': '15 min read',
+                      'isFeatured': true,
+                    },
+                  ];
+                  return _BlogCard(
+                    imageUrl: blogs[index]['image'] as String,
+                    title: blogs[index]['title'] as String,
+                    author: blogs[index]['author'] as String,
+                    likes: blogs[index]['likes'] as String,
+                    readTime: blogs[index]['readTime'] as String,
+                    isFeatured: blogs[index]['isFeatured'] as bool,
+                  );
+                }, childCount: 3),
               ),
             ),
-          ),
-          SliverPadding(
-            padding: EdgeInsets.symmetric(horizontal: 20.w),
-            sliver: SliverList(
-              delegate: SliverChildBuilderDelegate((context, index) {
-                final blogs = [
-                  {
-                    'image':
-                        'https://images.unsplash.com/photo-1501785888041-af3ef285b470',
-                    'title': '10 Hidden Gems in Bali You Must Visit',
-                    'author': 'Sarah Miller',
-                    'likes': '1.2K',
-                    'readTime': '8 min read',
-                    'isFeatured': true,
-                  },
-                  {
-                    'image':
-                        'https://images.unsplash.com/photo-1464037866556-6812c9d1c72e',
-                    'title':
-                        'Ultimate Road Trip Through Italy: A 2-Week Itinerary',
-                    'author': 'Marco Rossi',
-                    'likes': '2.4K',
-                    'readTime': '12 min read',
-                    'isFeatured': false,
-                  },
-                  {
-                    'image':
-                        'https://images.unsplash.com/photo-1527631746610-bca00a040d60',
-                    'title': 'Backpacking Southeast Asia on a Budget',
-                    'author': 'Lisa Wong',
-                    'likes': '3.1K',
-                    'readTime': '15 min read',
-                    'isFeatured': true,
-                  },
-                ];
-                return _BlogCard(
-                  imageUrl: blogs[index]['image'] as String,
-                  title: blogs[index]['title'] as String,
-                  author: blogs[index]['author'] as String,
-                  likes: blogs[index]['likes'] as String,
-                  readTime: blogs[index]['readTime'] as String,
-                  isFeatured: blogs[index]['isFeatured'] as bool,
-                );
-              }, childCount: 3),
-            ),
-          ),
 
-          // Bottom Space
-          SliverToBoxAdapter(child: SizedBox(height: 40.h)),
-        ],
+            // Bottom Space
+            SliverToBoxAdapter(child: SizedBox(height: 40.h)),
+          ],
+        ),
       ),
     );
   }
@@ -629,7 +679,7 @@ class _TrendingDestinationCard extends StatelessWidget {
       width: 180.w, // Slightly wider for better content display
       margin: EdgeInsets.only(right: 15.w),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: kCardColor,
         borderRadius: BorderRadius.circular(15.r),
         boxShadow: [
           BoxShadow(
@@ -732,7 +782,7 @@ class _BlogCard extends StatelessWidget {
     return Container(
       margin: EdgeInsets.only(bottom: 20.h),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: kCardColor,
         borderRadius: BorderRadius.circular(15.r),
         boxShadow: [
           BoxShadow(
