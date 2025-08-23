@@ -59,10 +59,10 @@ class Builddrawer extends StatelessWidget {
                         begin: Alignment.topLeft,
                         end: Alignment.bottomRight,
                       ),
-                      borderRadius: BorderRadius.only(
-                        topRight: Radius.circular(30.r),
-                        bottomLeft: Radius.circular(50.r),
-                      ),
+                      // borderRadius: BorderRadius.only(
+                      //   topRight: Radius.circular(30.r),
+                      //   bottomLeft: Radius.circular(50.r),
+                      // ),
                     ),
                     child: Stack(
                       children: [
@@ -146,123 +146,146 @@ class Builddrawer extends StatelessWidget {
               ),
               // Drawer Items with Hover Effects
               Expanded(
-                child: ListView(
-                  padding: EdgeInsets.only(top: 10.h),
-                  children: [
-                    buildListTile("assets/bookings_bw.png", "Blogs", () {}),
-                    buildListTile(
-                      "assets/profile_bw.png",
-                      "My Profile",
-                      () => Get.to(() => const UserProfileScreen()),
+                child: Container(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [
+                        Color(0xFF0F2027),
+                        Color(0xFF203A43),
+                        Color(0xFF2C5364),
+                      ],
                     ),
-                    buildListTile("assets/rating_bw.png", "Ratings", () {}),
-                    buildListTile(
-                      "assets/notification_setting.png",
-                      "Notification ON/OFF",
-                      () {
-                        // Get.to(() => NotificationScreenSetting());
-                      },
-                    ),
-                    buildListTile(
-                      "assets/about_us_bw.png",
-                      "About us",
-                      // () => Get.to(() => AboutUsScreen()),
-                      () => showToastMessage(
-                        "Coming Soon",
-                        "This feature is not available yet",
-                        kPrimary,
+                  ),
+                  child: ListView(
+                    padding: EdgeInsets.only(top: 10.h),
+                    children: [
+                      buildListTile("assets/bookings_bw.png", "Blogs", () {}),
+                      buildListTile(
+                        "assets/profile_bw.png",
+                        "My Profile",
+                        () => Get.to(() => const UserProfileScreen()),
                       ),
-                    ),
-                    buildListTile(
-                      "assets/help_bw.png",
-                      "Help",
-                      () => showToastMessage(
-                        "Coming Soon",
-                        "This feature is not available yet",
-                        kPrimary,
-                      ),
-                    ),
-                    buildListTile(
-                      "assets/t_c_bw.png",
-                      "Terms & Conditions",
-                      () => showToastMessage(
-                        "Coming Soon",
-                        "This feature is not available yet",
-                        kPrimary,
-                      ),
-                    ),
-                    buildListTile(
-                      "assets/privacy_bw.png",
-                      "Privacy Policy",
-                      () => showToastMessage(
-                        "Coming Soon",
-                        "This feature is not available yet",
-                        kPrimary,
-                      ),
-                    ),
-                    buildListTile("assets/out_bw.png", "Logout", () {
-                      showDialog<void>(
-                        context: context,
-                        barrierDismissible: true,
-                        builder: (BuildContext dialogContext) {
-                          return AlertDialog(
-                            title: const Text('Logout'),
-                            content: const Text(
-                              'Are you sure you want to log out from this account',
-                            ),
-                            actions: <Widget>[
-                              TextButton(
-                                child: Text(
-                                  'Yes',
-                                  style: appStyle(
-                                    15,
-                                    kSecondary,
-                                    FontWeight.normal,
-                                  ),
-                                ),
-                                onPressed: () async {
-                                  await userService.signOut();
-                                },
-                              ),
-                              TextButton(
-                                onPressed: () => Navigator.pop(dialogContext),
-                                child: Text(
-                                  "No",
-                                  style: appStyle(
-                                    15,
-                                    kPrimary,
-                                    FontWeight.normal,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          );
+                      buildListTile("assets/rating_bw.png", "Ratings", () {}),
+                      buildListTile(
+                        "assets/notification_setting.png",
+                        "Notification ON/OFF",
+                        () {
+                          // Get.to(() => NotificationScreenSetting());
                         },
-                      );
-                    }),
-                  ],
+                      ),
+                      buildListTile(
+                        "assets/about_us_bw.png",
+                        "About us",
+                        // () => Get.to(() => AboutUsScreen()),
+                        () => showToastMessage(
+                          "Coming Soon",
+                          "This feature is not available yet",
+                          kPrimary,
+                        ),
+                      ),
+                      buildListTile(
+                        "assets/help_bw.png",
+                        "Help",
+                        () => showToastMessage(
+                          "Coming Soon",
+                          "This feature is not available yet",
+                          kPrimary,
+                        ),
+                      ),
+                      buildListTile(
+                        "assets/t_c_bw.png",
+                        "Terms & Conditions",
+                        () => showToastMessage(
+                          "Coming Soon",
+                          "This feature is not available yet",
+                          kPrimary,
+                        ),
+                      ),
+                      buildListTile(
+                        "assets/privacy_bw.png",
+                        "Privacy Policy",
+                        () => showToastMessage(
+                          "Coming Soon",
+                          "This feature is not available yet",
+                          kPrimary,
+                        ),
+                      ),
+                      buildListTile("assets/out_bw.png", "Logout", () {
+                        showDialog<void>(
+                          context: context,
+                          barrierDismissible: true,
+                          builder: (BuildContext dialogContext) {
+                            return AlertDialog(
+                              title: const Text('Logout'),
+                              content: const Text(
+                                'Are you sure you want to log out from this account',
+                              ),
+                              actions: <Widget>[
+                                TextButton(
+                                  child: Text(
+                                    'Yes',
+                                    style: appStyle(
+                                      15,
+                                      kSecondary,
+                                      FontWeight.normal,
+                                    ),
+                                  ),
+                                  onPressed: () async {
+                                    await userService.signOut();
+                                  },
+                                ),
+                                TextButton(
+                                  onPressed: () => Navigator.pop(dialogContext),
+                                  child: Text(
+                                    "No",
+                                    style: appStyle(
+                                      15,
+                                      kPrimary,
+                                      FontWeight.normal,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            );
+                          },
+                        );
+                      }),
+                    ],
+                  ),
                 ),
               ),
 
               // Footer
-              Padding(
-                padding: EdgeInsets.all(20.w),
-                child: Column(
-                  children: [
-                    Divider(color: kGrayLight),
-                    SizedBox(height: 10.h),
-                    Text(
-                      'Journey Junction v$appVersion',
-                      style: appStyle(12, kGray, FontWeight.w400),
-                    ),
-                    SizedBox(height: 5.h),
-                    Text(
-                      '© 2025 All Rights Reserved',
-                      style: appStyle(12, kGray, FontWeight.w400),
-                    ),
-                  ],
-                ),
-              ),
+              // Container(
+              //   decoration: BoxDecoration(
+              //     gradient: LinearGradient(
+              //       begin: Alignment.topLeft,
+              //       end: Alignment.bottomRight,
+              //       colors: [
+              //         Color(0xFF0F2027),
+              //         Color(0xFF203A43),
+              //         Color(0xFF2C5364),
+              //       ],
+              //     ),
+              //   ),
+              //   child: Column(
+              //     children: [
+              //       Divider(color: kGrayLight),
+              //       SizedBox(height: 10.h),
+              //       Text(
+              //         'Journey Junction v$appVersion',
+              //         style: appStyle(12, kGray, FontWeight.w400),
+              //       ),
+              //       SizedBox(height: 5.h),
+              //       Text(
+              //         '© 2025 All Rights Reserved',
+              //         style: appStyle(12, kGray, FontWeight.w400),
+              //       ),
+              //     ],
+              //   ),
+              // ),
             ],
           ),
         ),

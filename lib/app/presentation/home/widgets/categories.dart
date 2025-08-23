@@ -43,11 +43,11 @@ class _HolographicCategory extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: kCardColor,
         borderRadius: BorderRadius.circular(16.r),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.white.withOpacity(0.05),
             blurRadius: 10,
             spreadRadius: 2,
           ),
@@ -71,7 +71,7 @@ class _HolographicCategory extends StatelessWidget {
             children: [
               Text(emoji, style: TextStyle(fontSize: 28.sp)),
               SizedBox(height: 8.h),
-              Text(label, style: appStyleRaleway(11, kDark, FontWeight.w600)),
+              Text(label, style: appStyleRaleway(11, kWhite, FontWeight.w600)),
             ],
           ),
         ),

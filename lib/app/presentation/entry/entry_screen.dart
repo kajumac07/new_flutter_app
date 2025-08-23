@@ -56,15 +56,11 @@ class _EntryScreenState extends State<EntryScreen>
     return Container(
       height: 80,
       decoration: BoxDecoration(
-        color: Colors.white,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.1),
-            blurRadius: 15,
-            spreadRadius: 1,
-            offset: const Offset(0, -5),
-          ),
-        ],
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [Color(0xFF0F2027), Color(0xFF203A43), Color(0xFF2C5364)],
+        ),
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -106,7 +102,7 @@ class _EntryScreenState extends State<EntryScreen>
                 scale: scale,
                 child: Icon(
                   icon,
-                  color: isActive ? kSecondary : kGray,
+                  color: isActive ? kSecondary : kWhite,
                   size: 28,
                 ),
               ),
@@ -117,7 +113,7 @@ class _EntryScreenState extends State<EntryScreen>
             label,
             style: appStyle(
               12,
-              isActive ? kSecondary : kGray,
+              isActive ? kSecondary : kWhite,
               isActive ? FontWeight.w600 : FontWeight.normal,
             ),
           ),

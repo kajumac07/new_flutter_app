@@ -21,22 +21,27 @@ class TrendingStoryWidget extends StatelessWidget {
       future: trendingStories,
       builder: (ctx, index) {
         final item = index.data;
+        final stories =
+            item?.docs
+                .where((doc) => (doc['uid'] ?? '').toString().isNotEmpty)
+                .toList() ??
+            [];
         return SliverToBoxAdapter(
           child: SizedBox(
             height: 260.h,
             child: ListView.builder(
               scrollDirection: Axis.horizontal,
               padding: EdgeInsets.only(left: 20.w, right: 20.w),
-              itemCount: item?.docs.length,
+              itemCount: stories.length,
               itemBuilder: (_, index) {
-                final story = item?.docs[index];
-                final List<dynamic> mediaList = story?['media'] ?? [];
+                final story = stories[index];
+                final List<dynamic> mediaList = story['media'] ?? [];
                 final String imageUrl = mediaList.isNotEmpty
                     ? mediaList.first
                     : '';
-                final String title = story?['title'] ?? 'Unknown Title';
-                final String pubId = story?['uid'] ?? '';
-                final String storyId = story?['sId'] ?? '';
+                final String title = story['title'] ?? 'Unknown Title';
+                final String pubId = story['uid'] ?? '';
+                final String storyId = story['sId'] ?? '';
 
                 return FutureBuilder<DocumentSnapshot>(
                   future: FirebaseFirestore.instance
@@ -45,7 +50,14 @@ class TrendingStoryWidget extends StatelessWidget {
                       .get(),
                   builder: (context, snapshot) {
                     String authorName = "Unknown Author";
-                    if (snapshot.hasData && snapshot.data!.exists) {
+
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return SizedBox();
+                    } else if (snapshot.hasError) {
+                      return Center(child: Text('Error loading author'));
+                    } else if (!snapshot.hasData || !snapshot.data!.exists) {
+                      return Center(child: Text('Author not found'));
+                    } else if (snapshot.hasData && snapshot.data!.exists) {
                       authorName =
                           snapshot.data!['fullName'] ?? 'Unknown Author';
                     }
