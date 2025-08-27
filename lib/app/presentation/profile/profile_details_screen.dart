@@ -57,6 +57,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
           ? const Center(child: CircularProgressIndicator(color: kSecondary))
           : GetBuilder<ProfileController>(
               init: ProfileController(),
+              global: false,
               builder: (controller) {
                 if (controller.isLoading || controller.currentUser == null) {
                   return const Center(

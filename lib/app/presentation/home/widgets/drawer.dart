@@ -48,7 +48,20 @@ class Builddrawer extends StatelessWidget {
                 init: ProfileController(),
                 builder: (controller) {
                   if (controller.isLoading) {
-                    return Center(child: CircularProgressIndicator());
+                    // return Center(child: CircularProgressIndicator());
+                    return Container(
+                      child: Center(
+                        child: Shimmer.fromColors(
+                          baseColor: kSecondary.withOpacity(0.3),
+                          highlightColor: kSecondary.withOpacity(0.1),
+                          child: Container(
+                            width: double.infinity,
+                            height: 200.h,
+                            color: kCardColor,
+                          ),
+                        ),
+                      ),
+                    );
                   }
                   final user = controller.currentUser;
                   return Container(

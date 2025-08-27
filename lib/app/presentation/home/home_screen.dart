@@ -452,12 +452,12 @@ Widget buildListTile(String iconName, String title, void Function() onTap) {
   return GestureDetector(
     onTap: onTap,
     child: ListTile(
-      leading: Image.asset(
-        iconName,
-        height: 20.h,
-        width: 20.w,
-        color: kPrimary,
-      ),
+      // leading: Image.asset(
+      //   iconName,
+      //   height: 20.h,
+      //   width: 20.w,
+      //   color: kPrimary,
+      // ),
       trailing: const Icon(Icons.arrow_forward_ios, size: 18, color: kGray),
       title: Text(title, style: appStyle(13, kDark, FontWeight.normal)),
       // onTap: onTap,

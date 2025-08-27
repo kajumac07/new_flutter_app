@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:new_flutter_app/app/core/constants/constdata.dart';
+import 'package:new_flutter_app/app/core/utils/app_styles.dart';
 import 'package:new_flutter_app/app/global/controller/authentication_controller.dart';
 import 'package:new_flutter_app/app/global/widgets/custom_container.dart';
 import 'package:new_flutter_app/app/presentation/auth/login/login_screen.dart';
@@ -310,7 +311,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
         prefixIcon: Icon(icon, color: kSecondary.withOpacity(0.7)),
         suffixIcon: suffixIcon,
         filled: true,
-        fillColor: Colors.grey[120],
+        fillColor: kCardColor,
         contentPadding: const EdgeInsets.symmetric(
           vertical: 18,
           horizontal: 20,
@@ -327,7 +328,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
           ),
         ),
       ),
-      style: const TextStyle(color: Color(0xFF333333)),
+      style: appStylePoppins(16, kDark, FontWeight.normal),
     );
   }
 }

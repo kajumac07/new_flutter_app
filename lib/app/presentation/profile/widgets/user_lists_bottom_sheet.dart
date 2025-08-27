@@ -1,8 +1,10 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:new_flutter_app/app/core/constants/constdata.dart';
 import 'package:new_flutter_app/app/core/services/collection_refrence.dart';
 import 'package:new_flutter_app/app/core/utils/app_styles.dart';
+import 'package:new_flutter_app/app/global/controller/profile_controller.dart';
 import 'package:new_flutter_app/app/global/models/user_model.dart';
 
 class UsersListBottomSheet extends StatelessWidget {
@@ -131,27 +133,35 @@ class _FollowButtonState extends State<FollowButton> {
         .collection("Persons")
         .doc(currentUId);
 
-    if (isFollowing) {
-      // 🔹 Unfollow
-      await userRef.update({
-        "followers": FieldValue.arrayRemove([currentUId]),
-      });
-      await currentUserRef.update({
-        "following": FieldValue.arrayRemove([widget.user.uid]),
-      });
-    } else {
-      // 🔹 Follow
-      await userRef.update({
-        "followers": FieldValue.arrayUnion([currentUId]),
-      });
-      await currentUserRef.update({
-        "following": FieldValue.arrayUnion([widget.user.uid]),
-      });
-    }
+    try {
+      if (isFollowing) {
+        // 🔹 Unfollow
+        await userRef.update({
+          "followers": FieldValue.arrayRemove([currentUId]),
+        });
+        await currentUserRef.update({
+          "following": FieldValue.arrayRemove([widget.user.uid]),
+        });
+      } else {
+        // 🔹 Follow
+        await userRef.update({
+          "followers": FieldValue.arrayUnion([currentUId]),
+        });
+        await currentUserRef.update({
+          "following": FieldValue.arrayUnion([widget.user.uid]),
+        });
+      }
 
-    setState(() {
-      isFollowing = !isFollowing;
-    });
+      setState(() {
+        isFollowing = !isFollowing;
+      });
+
+      // Force refresh the profile controller
+      Get.find<ProfileController>().fetchUserProfile();
+    } catch (e) {
+      print('Error toggling follow: $e');
+      // Handle error appropriately
+    }
   }
 
   @override
