@@ -6,6 +6,7 @@ import 'package:new_flutter_app/app/core/services/collection_refrence.dart';
 import 'package:new_flutter_app/app/core/utils/app_styles.dart';
 import 'package:new_flutter_app/app/global/controller/profile_controller.dart';
 import 'package:new_flutter_app/app/global/models/user_model.dart';
+import 'package:new_flutter_app/app/presentation/followedUsers/followed_user_profile_page.dart';
 
 class UsersListBottomSheet extends StatelessWidget {
   final List<dynamic> userIds;
@@ -75,19 +76,27 @@ class UsersListBottomSheet extends StatelessWidget {
                     itemCount: users.length,
                     itemBuilder: (context, index) {
                       final user = users[index];
-                      return ListTile(
-                        leading: CircleAvatar(
-                          backgroundImage: NetworkImage(user.profilePicture),
+                      return GestureDetector(
+                        onTap: () {
+                          Get.to(
+                            () => FollowedUserProfilePage(user: user),
+                            transition: Transition.rightToLeft,
+                          );
+                        },
+                        child: ListTile(
+                          leading: CircleAvatar(
+                            backgroundImage: NetworkImage(user.profilePicture),
+                          ),
+                          title: Text(
+                            user.fullName,
+                            style: appStyleLato(16, kWhite, FontWeight.w500),
+                          ),
+                          subtitle: Text(
+                            "@${user.userName}",
+                            style: appStyleLato(11, kWhite, FontWeight.normal),
+                          ),
+                          trailing: FollowButton(user: user),
                         ),
-                        title: Text(
-                          user.fullName,
-                          style: appStyleLato(16, kWhite, FontWeight.w500),
-                        ),
-                        subtitle: Text(
-                          "@${user.userName}",
-                          style: appStyleLato(11, kWhite, FontWeight.normal),
-                        ),
-                        trailing: FollowButton(user: user),
                       );
                     },
                   );

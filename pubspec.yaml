@@ -36,6 +36,7 @@ dependencies:
   iconsax:
   syncfusion_flutter_datepicker:
   flutter_image_compress:
+  animations:
 
 dev_dependencies:
   flutter_test:

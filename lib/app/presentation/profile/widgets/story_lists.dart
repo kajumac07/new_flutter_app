@@ -2,15 +2,12 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:get/get.dart';
-import 'package:new_flutter_app/app/core/constants/constdata.dart';
 import 'package:new_flutter_app/app/global/helper/truncate_with_elipsis.dart';
-import 'package:new_flutter_app/app/presentation/addStory/add_story.dart';
 import 'package:shimmer/shimmer.dart';
 
-class CurrentUserStoriesLists extends StatelessWidget {
+class UserStoriesLists extends StatelessWidget {
   final Future<QuerySnapshot>? storiesLists;
-  const CurrentUserStoriesLists({super.key, required this.storiesLists});
+  const UserStoriesLists({super.key, required this.storiesLists});
 
   @override
   Widget build(BuildContext context) {
@@ -28,24 +25,9 @@ class CurrentUserStoriesLists extends StatelessWidget {
                 children: [
                   Center(
                     child: Text(
-                      'No stories found. Share your Story!, tap to below button',
+                      'No stories found.',
                       style: TextStyle(fontSize: 16.sp, color: Colors.grey),
                     ),
-                  ),
-                  SizedBox(height: 10.h),
-                  ListTile(
-                    leading: Icon(Icons.history_edu, color: kSecondary),
-                    title: Text(
-                      "Add Story",
-                      style: TextStyle(fontSize: 16.sp, color: kSecondary),
-                    ),
-                    onTap: () {
-                      Get.to(
-                        () => AddStoryScreen(),
-                        transition: Transition.downToUp,
-                        duration: Duration(milliseconds: 500),
-                      ); // Replace with your AddStoryScreen
-                    },
                   ),
                 ],
               )

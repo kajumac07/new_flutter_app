@@ -314,9 +314,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                                   ),
                                   SizedBox(height: 15.h),
 
-                                  CurrentUserStoriesLists(
-                                    storiesLists: storiesLists,
-                                  ),
+                                  UserStoriesLists(storiesLists: storiesLists),
                                 ],
                               ),
                             ),

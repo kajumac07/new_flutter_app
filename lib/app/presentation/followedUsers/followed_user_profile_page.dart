@@ -1,0 +1,648 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:new_flutter_app/app/core/constants/constdata.dart';
+import 'package:new_flutter_app/app/core/services/collection_refrence.dart';
+import 'package:new_flutter_app/app/global/controller/profile_controller.dart';
+import 'package:new_flutter_app/app/global/models/post_model.dart';
+import 'package:new_flutter_app/app/global/models/user_model.dart';
+import 'package:new_flutter_app/app/core/utils/app_styles.dart';
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:animations/animations.dart';
+import 'package:new_flutter_app/app/presentation/followedUsers/widgets/post_card.dart';
+import 'package:new_flutter_app/app/presentation/storyDetails/story_details_screen.dart';
+import 'package:iconsax/iconsax.dart';
+
+class FollowedUserProfilePage extends StatefulWidget {
+  final UserModel user;
+
+  const FollowedUserProfilePage({Key? key, required this.user})
+    : super(key: key);
+
+  @override
+  _FollowedUserProfilePageState createState() =>
+      _FollowedUserProfilePageState();
+}
+
+class _FollowedUserProfilePageState extends State<FollowedUserProfilePage>
+    with SingleTickerProviderStateMixin {
+  late TabController _tabController;
+  final ScrollController _scrollController = ScrollController();
+  double _expandedHeight = 360;
+  bool _isFollowing = false;
+  final double _headerHeight = 220;
+
+  @override
+  void initState() {
+    super.initState();
+    _tabController = TabController(length: 2, vsync: this);
+    _checkIfFollowing();
+  }
+
+  void _checkIfFollowing() {
+    setState(() {
+      _isFollowing = widget.user.followers.contains(currentUId);
+    });
+  }
+
+  Future<void> _toggleFollow() async {
+    final userRef = FirebaseFirestore.instance
+        .collection("Persons")
+        .doc(widget.user.uid);
+    final currentUserRef = FirebaseFirestore.instance
+        .collection("Persons")
+        .doc(currentUId);
+
+    try {
+      if (_isFollowing) {
+        // Unfollow
+        await userRef.update({
+          "followers": FieldValue.arrayRemove([currentUId]),
+        });
+        await currentUserRef.update({
+          "following": FieldValue.arrayRemove([widget.user.uid]),
+        });
+      } else {
+        // Follow
+        await userRef.update({
+          "followers": FieldValue.arrayUnion([currentUId]),
+        });
+        await currentUserRef.update({
+          "following": FieldValue.arrayUnion([widget.user.uid]),
+        });
+      }
+
+      setState(() {
+        _isFollowing = !_isFollowing;
+      });
+
+      // Force refresh the profile controller
+      Get.find<ProfileController>().fetchUserProfile();
+    } catch (e) {
+      print('Error toggling follow: $e');
+      // Handle error appropriately
+    }
+  }
+
+  @override
+  void dispose() {
+    _tabController.dispose();
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: kCardColor,
+      body: NestedScrollView(
+        controller: _scrollController,
+        headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
+          return [
+            SliverAppBar(
+              expandedHeight: _expandedHeight,
+              pinned: true,
+              floating: true,
+              backgroundColor: Colors.transparent,
+              automaticallyImplyLeading: false,
+              flexibleSpace: _buildFlexibleSpaceBar(),
+              leading: IconButton(
+                icon: Icon(Icons.arrow_back, color: kWhite),
+                onPressed: () => Get.back(),
+              ),
+              actions: [
+                IconButton(
+                  icon: Icon(Icons.more_vert, color: kWhite),
+                  onPressed: () {},
+                ),
+              ],
+            ),
+          ];
+        },
+        body: Column(
+          children: [
+            Container(
+              decoration: BoxDecoration(
+                color: kCardColor,
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.1),
+                    blurRadius: 4,
+                    offset: Offset(0, 2),
+                  ),
+                ],
+              ),
+              child: TabBar(
+                controller: _tabController,
+                indicatorColor: kPrimary,
+                indicatorSize: TabBarIndicatorSize.label,
+                indicatorWeight: 3.0,
+                labelColor: kWhite,
+                unselectedLabelColor: kSecondary,
+                labelStyle: appStyleLato(14, kWhite, FontWeight.w600),
+                unselectedLabelStyle: appStyleLato(
+                  14,
+                  kSecondary,
+                  FontWeight.w500,
+                ),
+                tabs: [
+                  Tab(icon: Icon(Iconsax.book_1, size: 20), text: "Stories"),
+                  Tab(icon: Icon(Iconsax.grid_3, size: 20), text: "Posts"),
+                ],
+              ),
+            ),
+            Expanded(
+              child: TabBarView(
+                controller: _tabController,
+                children: [_buildStoriesLists(), _buildPostsList()],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildFlexibleSpaceBar() {
+    return LayoutBuilder(
+      builder: (BuildContext context, BoxConstraints constraints) {
+        final flexibleSpace = constraints.biggest.height;
+        final opacity =
+            (flexibleSpace - kToolbarHeight) /
+            (_expandedHeight - kToolbarHeight);
+
+        return Stack(
+          children: [
+            // Background with gradient
+            Container(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    kCardColor,
+                    kCardColor.withOpacity(0.9),
+                    kCardColor.withOpacity(0.8),
+                  ],
+                  stops: [0.0, 0.5, 1.0],
+                ),
+              ),
+            ),
+
+            // Content that fades as we scroll
+            Opacity(
+              opacity: opacity.clamp(0.0, 1.0),
+              child: SingleChildScrollView(
+                child: Column(
+                  children: [
+                    SizedBox(height: _headerHeight * 0.2),
+                    _buildProfileHeader(),
+                  ],
+                ),
+              ),
+            ),
+
+            // Username that appears as we scroll up
+            if (opacity < 0.8)
+              Positioned(
+                bottom: 16,
+                left: 0,
+                right: 0,
+                child: Opacity(
+                  opacity: (1 - opacity).clamp(0.0, 1.0),
+                  child: Center(
+                    child: Text(
+                      widget.user.fullName,
+                      style: appStyleLato(18, kWhite, FontWeight.bold),
+                    ),
+                  ),
+                ),
+              ),
+          ],
+        );
+      },
+    );
+  }
+
+  Widget _buildProfileHeader() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          _buildProfileInfo(),
+          SizedBox(height: 16),
+          _buildStatsRow(),
+          SizedBox(height: 16),
+          _buildActionButtons(),
+          SizedBox(height: 16),
+          _buildBioSection(),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildProfileInfo() {
+    return Stack(
+      alignment: Alignment.center,
+      children: [
+        // Outer ring with gradient
+        Container(
+          width: 110,
+          height: 110,
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [Color(0xFFFD1D1D), Color(0xFF833AB4), Color(0xFF405DE6)],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+            shape: BoxShape.circle,
+          ),
+        ),
+
+        // Profile image container
+        Container(
+          width: 100,
+          height: 100,
+          decoration: BoxDecoration(
+            color: kCardColor,
+            shape: BoxShape.circle,
+            border: Border.all(color: kCardColor, width: 4),
+          ),
+          child: OpenContainer(
+            transitionDuration: Duration(milliseconds: 500),
+            openBuilder: (context, action) {
+              return Scaffold(
+                backgroundColor: kCardColor,
+                appBar: AppBar(
+                  backgroundColor: Colors.transparent,
+                  leading: IconButton(
+                    icon: Icon(Icons.arrow_back, color: kWhite),
+                    onPressed: () => Get.back(),
+                  ),
+                ),
+                body: Center(
+                  child: Hero(
+                    tag: 'profile_image_${widget.user.uid}',
+                    child: CachedNetworkImage(
+                      imageUrl: widget.user.profilePicture,
+                      fit: BoxFit.contain,
+                    ),
+                  ),
+                ),
+              );
+            },
+            closedElevation: 0,
+            closedShape: CircleBorder(),
+            closedColor: Colors.transparent,
+            closedBuilder: (context, action) {
+              return Hero(
+                tag: 'profile_image_${widget.user.uid}',
+                child: ClipOval(
+                  child: CachedNetworkImage(
+                    imageUrl: widget.user.profilePicture,
+                    fit: BoxFit.cover,
+                    placeholder: (context, url) =>
+                        CircularProgressIndicator(color: kPrimary),
+                    errorWidget: (context, url, error) =>
+                        Icon(Icons.person, color: kWhite, size: 40),
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildStatsRow() {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.black.withOpacity(0.2),
+        borderRadius: BorderRadius.circular(16),
+      ),
+      padding: EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        children: [
+          _buildStatItem(widget.user.posts.length.toString(), 'Posts'),
+          _buildVerticalDivider(),
+          _buildStatItem(widget.user.stories.length.toString(), 'Stories'),
+          _buildVerticalDivider(),
+          _buildStatItem(widget.user.followers.length.toString(), 'Followers'),
+          _buildVerticalDivider(),
+          _buildStatItem(widget.user.following.length.toString(), 'Following'),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildVerticalDivider() {
+    return Container(width: 1, height: 24, color: kSecondary.withOpacity(0.3));
+  }
+
+  Widget _buildStatItem(String value, String label) {
+    return Column(
+      children: [
+        Text(value, style: appStyleLato(16, kWhite, FontWeight.bold)),
+        SizedBox(height: 4),
+        Text(label, style: appStyleLato(12, kSecondary, FontWeight.normal)),
+      ],
+    );
+  }
+
+  Widget _buildActionButtons() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        ElevatedButton(
+          onPressed: _toggleFollow,
+          style: ElevatedButton.styleFrom(
+            backgroundColor: _isFollowing ? Colors.transparent : kSecondary,
+            foregroundColor: _isFollowing ? kPrimary : kWhite,
+            padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20),
+              side: _isFollowing
+                  ? BorderSide(color: kCardColor, width: 1)
+                  : BorderSide.none,
+            ),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(_isFollowing ? Icons.check : Icons.add, size: 18),
+              SizedBox(width: 6),
+              Text(
+                _isFollowing ? "Following" : "Follow",
+                style: appStyleLato(
+                  14,
+                  _isFollowing ? kPrimary : kWhite,
+                  FontWeight.w500,
+                ),
+              ),
+            ],
+          ),
+        ),
+        SizedBox(width: 12),
+        Container(
+          height: 42,
+          width: 42,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: kSecondary.withOpacity(0.5)),
+          ),
+          child: IconButton(
+            icon: Icon(Iconsax.message, color: kWhite, size: 20),
+            onPressed: () {},
+          ),
+        ),
+        SizedBox(width: 12),
+        Container(
+          height: 42,
+          width: 42,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: kSecondary.withOpacity(0.5)),
+          ),
+          child: IconButton(
+            icon: Icon(Iconsax.notification, color: kWhite, size: 20),
+            onPressed: () {},
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildBioSection() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        Text(
+          widget.user.fullName,
+          style: appStyleLato(18, kWhite, FontWeight.bold),
+        ),
+        SizedBox(height: 6),
+        if (widget.user.bio.isNotEmpty)
+          Text(
+            widget.user.bio,
+            textAlign: TextAlign.center,
+            style: appStyleLato(14, kSecondary, FontWeight.normal),
+          ),
+      ],
+    );
+  }
+
+  Widget _buildStoriesLists() {
+    return FutureBuilder<QuerySnapshot>(
+      future: FirebaseFirestore.instance
+          .collection('Stories')
+          .where("uid", isEqualTo: widget.user.uid)
+          .get(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return Center(child: CircularProgressIndicator(color: kPrimary));
+        }
+        if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+          return Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Iconsax.book_1, size: 48, color: kSecondary),
+                SizedBox(height: 16),
+                Text(
+                  "No stories yet",
+                  style: appStyleLato(16, kSecondary, FontWeight.normal),
+                ),
+              ],
+            ),
+          );
+        }
+
+        final stories = snapshot.data!.docs;
+
+        return GridView.builder(
+          padding: EdgeInsets.all(16),
+          itemCount: stories.length,
+          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 2,
+            crossAxisSpacing: 12,
+            mainAxisSpacing: 12,
+            childAspectRatio: 0.7,
+          ),
+          itemBuilder: (ctx, index) {
+            final story = stories[index];
+            final String title = story['title'] ?? "Untitled";
+            final List media = story['media'] ?? [];
+            final String imageUrl = media.isNotEmpty ? media.first : "";
+
+            return GestureDetector(
+              onTap: () {
+                Get.to(
+                  () => StoryDetailsScreen(
+                    storyId: story['sId'],
+                    publishedUserId: story['uid'],
+                    currentUserId: currentUId,
+                    storyTitle: title,
+                  ),
+                );
+              },
+              child: Container(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(20),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.2),
+                      blurRadius: 8,
+                      offset: Offset(0, 4),
+                    ),
+                  ],
+                ),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(20),
+                  child: Stack(
+                    fit: StackFit.expand,
+                    children: [
+                      imageUrl.isNotEmpty
+                          ? CachedNetworkImage(
+                              imageUrl: imageUrl,
+                              fit: BoxFit.cover,
+                              color: Colors.black.withOpacity(0.3),
+                              colorBlendMode: BlendMode.darken,
+                            )
+                          : Container(color: Colors.grey.shade800),
+                      Align(
+                        alignment: Alignment.bottomLeft,
+                        child: Container(
+                          padding: EdgeInsets.all(12),
+                          child: Text(
+                            title,
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 14,
+                            ),
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ),
+                      Positioned(
+                        top: 8,
+                        right: 8,
+                        child: Container(
+                          padding: EdgeInsets.all(4),
+                          decoration: BoxDecoration(
+                            color: Colors.black.withOpacity(0.5),
+                            shape: BoxShape.circle,
+                          ),
+                          child: Icon(
+                            Iconsax.book_1,
+                            size: 16,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  Widget _buildPostsList() {
+    return FutureBuilder<QuerySnapshot>(
+      future: FirebaseFirestore.instance
+          .collection('Posts')
+          .where("uid", isEqualTo: widget.user.uid)
+          .get(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return Center(child: CircularProgressIndicator(color: kPrimary));
+        }
+        if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+          return Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Iconsax.grid_3, size: 48, color: kSecondary),
+                SizedBox(height: 16),
+                Text(
+                  "No posts yet",
+                  style: appStyleLato(16, kSecondary, FontWeight.normal),
+                ),
+              ],
+            ),
+          );
+        }
+
+        final posts = snapshot.data!.docs;
+
+        return ListView.builder(
+          padding: EdgeInsets.all(16),
+          itemCount: posts.length,
+          itemBuilder: (context, index) {
+            final PostModel post = PostModel.fromMap(
+              posts[index].data() as Map<String, dynamic>,
+            );
+
+            final String userId = post.uid;
+
+            return FutureBuilder(
+              future: FirebaseFirestore.instance
+                  .collection("Persons")
+                  .doc(userId)
+                  .get(),
+              builder: (context, userSnapshot) {
+                if (userSnapshot.connectionState == ConnectionState.waiting) {
+                  return Center(
+                    child: CircularProgressIndicator(color: kPrimary),
+                  );
+                }
+                if (!userSnapshot.hasData || !userSnapshot.data!.exists) {
+                  return SizedBox.shrink();
+                }
+
+                final userData = userSnapshot.data!;
+                final userName = userData['userName'] ?? 'Unknown';
+                final userProfilePic = userData['profilePicture'] ?? '';
+                final fullName = userData['fullName'] ?? 'Unknown';
+
+                return Container(
+                  margin: EdgeInsets.only(bottom: 16),
+                  child: PostCard(
+                    userName: userName,
+                    userProfilePic: userProfilePic,
+                    fullName: fullName,
+                    post: PostModel(
+                      uid: post.uid,
+                      postId: post.postId,
+                      title: post.title,
+                      description: post.description,
+                      media: post.media,
+                      category: post.category,
+                      location: post.location,
+                      isPublic: post.isPublic,
+                      allowComments: post.allowComments,
+                      tags: post.tags,
+                      createdAt: post.createdAt,
+                      likes: post.likes,
+                      comments: post.comments,
+                      scheduledAt: post.scheduledAt,
+                      status: post.status,
+                    ),
+                  ),
+                );
+              },
+            );
+          },
+        );
+      },
+    );
+  }
+}
