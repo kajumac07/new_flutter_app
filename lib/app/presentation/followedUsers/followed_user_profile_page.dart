@@ -4,12 +4,11 @@ import 'package:get/get.dart';
 import 'package:new_flutter_app/app/core/constants/constdata.dart';
 import 'package:new_flutter_app/app/core/services/collection_refrence.dart';
 import 'package:new_flutter_app/app/global/controller/profile_controller.dart';
-import 'package:new_flutter_app/app/global/models/post_model.dart';
 import 'package:new_flutter_app/app/global/models/user_model.dart';
 import 'package:new_flutter_app/app/core/utils/app_styles.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:animations/animations.dart';
-import 'package:new_flutter_app/app/presentation/followedUsers/widgets/post_card.dart';
+import 'package:new_flutter_app/app/presentation/followedUsers/widgets/posts_lists_widget.dart';
 import 'package:new_flutter_app/app/presentation/storyDetails/story_details_screen.dart';
 import 'package:iconsax/iconsax.dart';
 
@@ -28,7 +27,7 @@ class _FollowedUserProfilePageState extends State<FollowedUserProfilePage>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
   final ScrollController _scrollController = ScrollController();
-  double _expandedHeight = 360;
+  double _expandedHeight = 390;
   bool _isFollowing = false;
   final double _headerHeight = 220;
 
@@ -103,7 +102,7 @@ class _FollowedUserProfilePageState extends State<FollowedUserProfilePage>
               expandedHeight: _expandedHeight,
               pinned: true,
               floating: true,
-              backgroundColor: Colors.transparent,
+              backgroundColor: kCardColor,
               automaticallyImplyLeading: false,
               flexibleSpace: _buildFlexibleSpaceBar(),
               leading: IconButton(
@@ -111,10 +110,10 @@ class _FollowedUserProfilePageState extends State<FollowedUserProfilePage>
                 onPressed: () => Get.back(),
               ),
               actions: [
-                IconButton(
-                  icon: Icon(Icons.more_vert, color: kWhite),
-                  onPressed: () {},
-                ),
+                // IconButton(
+                //   icon: Icon(Icons.more_vert, color: kWhite),
+                //   onPressed: () {},
+                // ),
               ],
             ),
           ];
@@ -134,7 +133,7 @@ class _FollowedUserProfilePageState extends State<FollowedUserProfilePage>
               ),
               child: TabBar(
                 controller: _tabController,
-                indicatorColor: kPrimary,
+                indicatorColor: kSecondary,
                 indicatorSize: TabBarIndicatorSize.label,
                 indicatorWeight: 3.0,
                 labelColor: kWhite,
@@ -154,7 +153,10 @@ class _FollowedUserProfilePageState extends State<FollowedUserProfilePage>
             Expanded(
               child: TabBarView(
                 controller: _tabController,
-                children: [_buildStoriesLists(), _buildPostsList()],
+                children: [
+                  _buildStoriesLists(),
+                  BuildPostsLists(fUID: widget.user.uid),
+                ],
               ),
             ),
           ],
@@ -195,7 +197,7 @@ class _FollowedUserProfilePageState extends State<FollowedUserProfilePage>
               child: SingleChildScrollView(
                 child: Column(
                   children: [
-                    SizedBox(height: _headerHeight * 0.2),
+                    SizedBox(height: _headerHeight * 0.25),
                     _buildProfileHeader(),
                   ],
                 ),
@@ -252,7 +254,7 @@ class _FollowedUserProfilePageState extends State<FollowedUserProfilePage>
           height: 110,
           decoration: BoxDecoration(
             gradient: LinearGradient(
-              colors: [Color(0xFFFD1D1D), Color(0xFF833AB4), Color(0xFF405DE6)],
+              colors: [kCardColor, kSecondary, kCardColor],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
             ),
@@ -486,6 +488,8 @@ class _FollowedUserProfilePageState extends State<FollowedUserProfilePage>
                     currentUserId: currentUId,
                     storyTitle: title,
                   ),
+                  transition: Transition.rightToLeft,
+                  duration: Duration(milliseconds: 300),
                 );
               },
               child: Container(
@@ -548,97 +552,6 @@ class _FollowedUserProfilePageState extends State<FollowedUserProfilePage>
                   ),
                 ),
               ),
-            );
-          },
-        );
-      },
-    );
-  }
-
-  Widget _buildPostsList() {
-    return FutureBuilder<QuerySnapshot>(
-      future: FirebaseFirestore.instance
-          .collection('Posts')
-          .where("uid", isEqualTo: widget.user.uid)
-          .get(),
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return Center(child: CircularProgressIndicator(color: kPrimary));
-        }
-        if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-          return Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(Iconsax.grid_3, size: 48, color: kSecondary),
-                SizedBox(height: 16),
-                Text(
-                  "No posts yet",
-                  style: appStyleLato(16, kSecondary, FontWeight.normal),
-                ),
-              ],
-            ),
-          );
-        }
-
-        final posts = snapshot.data!.docs;
-
-        return ListView.builder(
-          padding: EdgeInsets.all(16),
-          itemCount: posts.length,
-          itemBuilder: (context, index) {
-            final PostModel post = PostModel.fromMap(
-              posts[index].data() as Map<String, dynamic>,
-            );
-
-            final String userId = post.uid;
-
-            return FutureBuilder(
-              future: FirebaseFirestore.instance
-                  .collection("Persons")
-                  .doc(userId)
-                  .get(),
-              builder: (context, userSnapshot) {
-                if (userSnapshot.connectionState == ConnectionState.waiting) {
-                  return Center(
-                    child: CircularProgressIndicator(color: kPrimary),
-                  );
-                }
-                if (!userSnapshot.hasData || !userSnapshot.data!.exists) {
-                  return SizedBox.shrink();
-                }
-
-                final userData = userSnapshot.data!;
-                final userName = userData['userName'] ?? 'Unknown';
-                final userProfilePic = userData['profilePicture'] ?? '';
-                final fullName = userData['fullName'] ?? 'Unknown';
-
-                return Container(
-                  margin: EdgeInsets.only(bottom: 16),
-                  child: PostCard(
-                    userName: userName,
-                    userProfilePic: userProfilePic,
-                    fullName: fullName,
-                    post: PostModel(
-                      uid: post.uid,
-                      postId: post.postId,
-                      title: post.title,
-                      description: post.description,
-                      media: post.media,
-                      category: post.category,
-                      location: post.location,
-                      isPublic: post.isPublic,
-                      allowComments: post.allowComments,
-                      tags: post.tags,
-                      createdAt: post.createdAt,
-                      likes: post.likes,
-                      comments: post.comments,
-                      scheduledAt: post.scheduledAt,
-                      status: post.status,
-                    ),
-                  ),
-                );
-              },
             );
           },
         );
