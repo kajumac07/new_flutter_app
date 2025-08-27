@@ -78,6 +78,7 @@ class UsersListBottomSheet extends StatelessWidget {
                       final user = users[index];
                       return GestureDetector(
                         onTap: () {
+                          Navigator.pop(context); // Close the bottom sheet
                           Get.to(
                             () => FollowedUserProfilePage(user: user),
                             transition: Transition.rightToLeft,

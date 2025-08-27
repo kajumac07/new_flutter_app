@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:iconsax/iconsax.dart';
 import 'package:new_flutter_app/app/core/constants/constdata.dart';
 import 'package:new_flutter_app/app/core/utils/app_styles.dart';
 import 'package:new_flutter_app/app/global/controller/home_controller.dart';
@@ -12,6 +13,7 @@ import 'package:new_flutter_app/app/presentation/cloudNotificationScreen/cloud_n
 import 'package:new_flutter_app/app/presentation/home/widgets/categories.dart';
 import 'package:new_flutter_app/app/presentation/home/widgets/drawer.dart';
 import 'package:new_flutter_app/app/presentation/home/widgets/trending_story_widget.dart';
+import 'package:new_flutter_app/app/presentation/messenger/messenger_screen.dart';
 import 'package:new_flutter_app/app/presentation/profile/profile_details_screen.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:get/get.dart';
@@ -91,17 +93,11 @@ class _HomeScreenState extends State<HomeScreen> {
                           collapseMode: CollapseMode.pin,
                           title: Text(
                             'J-Junction',
-                            style: appStyle(25, kWhite, FontWeight.w900)
-                                .copyWith(
-                                  letterSpacing: 1.5,
-                                  // shadows: [
-                                  //   Shadow(
-                                  //     color: kWhite,
-                                  //     blurRadius: 1,
-                                  //     offset: Offset(2, 2),
-                                  //   ),
-                                  // ],
-                                ),
+                            style: appStyle(
+                              25,
+                              kWhite,
+                              FontWeight.w900,
+                            ).copyWith(letterSpacing: 1.5),
                           ),
                           centerTitle: true,
                         ),
@@ -124,9 +120,9 @@ class _HomeScreenState extends State<HomeScreen> {
 
                           SizedBox(width: 5.w),
                           GlowingIconButton(
-                            icon: Icons.person,
+                            icon: Iconsax.message,
                             onTap: () => Get.to(
-                              () => UserProfileScreen(),
+                              () => MessengerScreen(),
                               transition: Transition.rightToLeftWithFade,
                               duration: Duration(milliseconds: 500),
                             ),

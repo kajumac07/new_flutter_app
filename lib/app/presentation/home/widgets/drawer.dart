@@ -178,7 +178,11 @@ class Builddrawer extends StatelessWidget {
                       buildListTile(
                         "assets/profile_bw.png",
                         "My Profile",
-                        () => Get.to(() => const UserProfileScreen()),
+                        () => Get.to(
+                          () => UserProfileScreen(),
+                          transition: Transition.rightToLeftWithFade,
+                          duration: Duration(milliseconds: 500),
+                        ),
                       ),
                       buildListTile("assets/rating_bw.png", "Ratings", () {}),
                       buildListTile(
