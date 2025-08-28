@@ -10,8 +10,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:animations/animations.dart';
 import 'package:new_flutter_app/app/presentation/followedUsers/widgets/posts_lists_widget.dart';
 import 'package:new_flutter_app/app/presentation/followedUsers/widgets/stories_lists.dart';
-import 'package:new_flutter_app/app/presentation/messenger/messenger_screen.dart';
-import 'package:new_flutter_app/app/presentation/storyDetails/story_details_screen.dart';
+import 'package:new_flutter_app/app/presentation/messenger/widgets/chat_screen.dart';
 import 'package:iconsax/iconsax.dart';
 
 class FollowedUserProfilePage extends StatefulWidget {
@@ -400,8 +399,15 @@ class _FollowedUserProfilePageState extends State<FollowedUserProfilePage>
           child: IconButton(
             icon: Icon(Iconsax.message, color: kWhite, size: 20),
             onPressed: () {
+              String currentUid = currentUId;
+              String otherUid = widget.user.uid;
+
+              // Generate chatId (sorted so it’s same for both users)
+              String chatId = currentUid.compareTo(otherUid) < 0
+                  ? "${currentUid}_$otherUid"
+                  : "${otherUid}_$currentUid";
               Get.to(
-                () => MessengerScreen(),
+                () => ChatScreen(chatId: chatId, receiver: widget.user),
                 transition: Transition.rightToLeftWithFade,
                 duration: Duration(milliseconds: 500),
               );
