@@ -214,25 +214,15 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                                             user.followers.length.toString(),
                                             'Followers',
                                             onTap: () {
-                                              showModalBottomSheet(
-                                                context: context,
-                                                isScrollControlled: true,
-                                                backgroundColor: kCardColor,
-                                                shape:
-                                                    const RoundedRectangleBorder(
-                                                      borderRadius:
-                                                          BorderRadius.vertical(
-                                                            top:
-                                                                Radius.circular(
-                                                                  20,
-                                                                ),
-                                                          ),
-                                                    ),
-                                                builder: (context) =>
-                                                    UsersListBottomSheet(
-                                                      userIds: user.followers,
-                                                      title: "Followers",
-                                                    ),
+                                              Get.to(
+                                                () => UsersListBottomSheet(
+                                                  userIds: user.following,
+                                                  title: "Followers",
+                                                ),
+                                                transition: Transition.native,
+                                                duration: const Duration(
+                                                  milliseconds: 300,
+                                                ),
                                               );
                                             },
                                           ),
@@ -240,25 +230,15 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                                             user.following.length.toString(),
                                             'Following',
                                             onTap: () {
-                                              showModalBottomSheet(
-                                                context: context,
-                                                isScrollControlled: true,
-                                                backgroundColor: kCardColor,
-                                                shape:
-                                                    const RoundedRectangleBorder(
-                                                      borderRadius:
-                                                          BorderRadius.vertical(
-                                                            top:
-                                                                Radius.circular(
-                                                                  20,
-                                                                ),
-                                                          ),
-                                                    ),
-                                                builder: (context) =>
-                                                    UsersListBottomSheet(
-                                                      userIds: user.following,
-                                                      title: "Following",
-                                                    ),
+                                              Get.to(
+                                                () => UsersListBottomSheet(
+                                                  userIds: user.following,
+                                                  title: "Following",
+                                                ),
+                                                transition: Transition.native,
+                                                duration: const Duration(
+                                                  milliseconds: 300,
+                                                ),
                                               );
                                             },
                                           ),

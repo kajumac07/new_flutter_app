@@ -453,7 +453,9 @@ class _MessengerScreenState extends State<MessengerScreen> {
                       Text(
                         lastMessage,
                         style: TextStyle(
-                          color: hasUnread ? kWhite : kSecondary,
+                          color: hasUnread
+                              ? kSecondary.withOpacity(0.7)
+                              : kSecondary,
                           fontSize: 14,
                           fontWeight: hasUnread
                               ? FontWeight.w500
@@ -470,7 +472,7 @@ class _MessengerScreenState extends State<MessengerScreen> {
                     margin: EdgeInsets.only(left: 8),
                     padding: EdgeInsets.all(8),
                     decoration: BoxDecoration(
-                      color: kPrimary,
+                      color: kSecondary,
                       shape: BoxShape.circle,
                     ),
                     child: Text(
