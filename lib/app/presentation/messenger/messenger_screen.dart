@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'package:new_flutter_app/app/core/constants/constdata.dart';
 import 'package:new_flutter_app/app/core/services/collection_refrence.dart';
 import 'package:new_flutter_app/app/global/models/user_model.dart';
+import 'package:new_flutter_app/app/presentation/createGroup/create_group_screen.dart';
 import 'package:new_flutter_app/app/presentation/messenger/widgets/chat_screen.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:shimmer/shimmer.dart';
@@ -268,7 +269,88 @@ class _MessengerScreenState extends State<MessengerScreen> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          //went to other screen to select user to chat
+          showModalBottomSheet(
+            context: context,
+            backgroundColor: Colors.transparent,
+            isScrollControlled: true,
+            builder: (context) {
+              return Container(
+                padding: EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  color: kCardColor,
+                  borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+                ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Container(
+                      width: 50,
+                      height: 5,
+                      margin: EdgeInsets.only(bottom: 16),
+                      decoration: BoxDecoration(
+                        color: Colors.grey[600],
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                    ),
+                    Text(
+                      "Choose an option",
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: kWhite,
+                      ),
+                    ),
+                    SizedBox(height: 20),
+
+                    // New Conversation
+                    ListTile(
+                      leading: CircleAvatar(
+                        backgroundColor: kSecondary.withOpacity(0.1),
+                        child: Icon(Iconsax.message_add, color: kSecondary),
+                      ),
+                      title: Text(
+                        "Start New Conversation",
+                        style: TextStyle(color: kWhite, fontSize: 16),
+                      ),
+                      trailing: Icon(Iconsax.arrow_right_3, color: kSecondary),
+                      onTap: () {
+                        Navigator.pop(context);
+                        // Navigate to user selection screen
+                      },
+                    ),
+
+                    Divider(color: Colors.grey[700]),
+
+                    // Create Group
+                    ListTile(
+                      leading: CircleAvatar(
+                        backgroundColor: Colors.blueAccent.withOpacity(0.1),
+                        child: Icon(Iconsax.people, color: Colors.blueAccent),
+                      ),
+                      title: Text(
+                        "Create Group",
+                        style: TextStyle(color: kWhite, fontSize: 16),
+                      ),
+                      trailing: Icon(
+                        Iconsax.arrow_right_3,
+                        color: Colors.blueAccent,
+                      ),
+                      onTap: () {
+                        Navigator.pop(context);
+                        Get.to(
+                          () => CreateGroupScreen(),
+                          transition: Transition.leftToRight,
+                          duration: Duration(microseconds: 3000),
+                        );
+                        // Navigate to group creation screen
+                      },
+                    ),
+                    SizedBox(height: 10),
+                  ],
+                ),
+              );
+            },
+          );
         },
         backgroundColor: kSecondary,
         child: Icon(Iconsax.edit, color: kWhite, size: 28),
