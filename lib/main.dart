@@ -29,7 +29,6 @@ class MyApp extends StatelessWidget {
         return GetMaterialApp(
           debugShowCheckedModeBanner: false,
           title: 'Journey Junction',
-          // theme: ThemeData(primarySwatch: Color),
           home: Obx(() {
             final userService = UserService.to;
             if (userService.currentUser.value == null) {

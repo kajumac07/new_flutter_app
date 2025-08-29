@@ -7,6 +7,7 @@ import 'package:new_flutter_app/app/core/services/user_service.dart';
 import 'package:new_flutter_app/app/core/utils/app_styles.dart';
 import 'package:new_flutter_app/app/core/utils/toast_msg.dart';
 import 'package:new_flutter_app/app/global/controller/profile_controller.dart';
+import 'package:new_flutter_app/app/global/helper/truncate_with_elipsis.dart';
 import 'package:new_flutter_app/app/presentation/home/home_screen.dart';
 import 'package:shimmer/shimmer.dart';
 import '../../profile/profile_details_screen.dart';
@@ -140,7 +141,7 @@ class Builddrawer extends StatelessWidget {
                                   ),
                                   SizedBox(height: 5.h),
                                   Text(
-                                    user.emailAddress,
+                                    truncateWithEllipsis(20, user.emailAddress),
                                     style: appStyle(
                                       12,
                                       Colors.white70,

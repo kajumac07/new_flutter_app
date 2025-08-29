@@ -16,6 +16,62 @@ class MessengerScreen extends StatefulWidget {
 class _MessengerScreenState extends State<MessengerScreen> {
   final TextEditingController _searchController = TextEditingController();
   bool _isSearching = false;
+  String _searchQuery = '';
+  List<UserModel> _followers = [];
+  List<UserModel> _following = [];
+  bool _isLoadingUsers = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadFollowUsers();
+  }
+
+  Future<void> _loadFollowUsers() async {
+    setState(() {
+      _isLoadingUsers = true;
+    });
+
+    try {
+      // Get current user data
+      final currentUserDoc = await FirebaseFirestore.instance
+          .collection("Persons")
+          .doc(currentUId)
+          .get();
+
+      if (currentUserDoc.exists) {
+        final currentUser = UserModel.fromMap(
+          currentUserDoc.data() as Map<String, dynamic>,
+        );
+
+        // Get followers
+        final followersSnapshot = await FirebaseFirestore.instance
+            .collection("Persons")
+            .where("uid", whereIn: currentUser.followers)
+            .get();
+
+        _followers = followersSnapshot.docs
+            .map((doc) => UserModel.fromMap(doc.data()))
+            .toList();
+
+        // Get following
+        final followingSnapshot = await FirebaseFirestore.instance
+            .collection("Persons")
+            .where("uid", whereIn: currentUser.following)
+            .get();
+
+        _following = followingSnapshot.docs
+            .map((doc) => UserModel.fromMap(doc.data()))
+            .toList();
+      }
+    } catch (e) {
+      print("Error loading follow users: $e");
+    } finally {
+      setState(() {
+        _isLoadingUsers = false;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -62,7 +118,10 @@ class _MessengerScreenState extends State<MessengerScreen> {
                 onPressed: () {
                   setState(() {
                     _isSearching = !_isSearching;
-                    if (!_isSearching) _searchController.clear();
+                    if (!_isSearching) {
+                      _searchController.clear();
+                      _searchQuery = '';
+                    }
                   });
                 },
               ),
@@ -116,16 +175,34 @@ class _MessengerScreenState extends State<MessengerScreen> {
 
               final chats = snapshot.data!.docs;
 
+              // Filter chats based on search query
+              final filteredChats = _searchQuery.isEmpty
+                  ? chats
+                  : chats.where((chat) {
+                      final data = chat.data() as Map<String, dynamic>;
+                      final List members = data["members"];
+                      final String otherUid = members.firstWhere(
+                        (id) => id != currentUId,
+                        orElse: () => "",
+                      );
+
+                      // We'll check the user's name in the async part
+                      return true;
+                    }).toList();
+
               return SliverList(
                 delegate: SliverChildBuilderDelegate((context, index) {
-                  final doc = chats[index];
+                  final doc = filteredChats[index];
                   final data = doc.data() as Map<String, dynamic>;
                   final List members = data["members"];
 
                   // find the other user (receiver)
                   final String otherUid = members.firstWhere(
                     (id) => id != currentUId,
+                    orElse: () => "",
                   );
+
+                  if (otherUid.isEmpty) return SizedBox();
 
                   return FutureBuilder<DocumentSnapshot>(
                     future: FirebaseFirestore.instance
@@ -140,6 +217,24 @@ class _MessengerScreenState extends State<MessengerScreen> {
                       final UserModel userData = UserModel.fromMap(
                         userSnap.data!.data() as Map<String, dynamic>,
                       );
+
+                      // Apply search filter
+                      if (_searchQuery.isNotEmpty &&
+                          !userData.fullName.toLowerCase().contains(
+                            _searchQuery.toLowerCase(),
+                          )) {
+                        return SizedBox();
+                      }
+
+                      // Check if the last message was sent by the current user
+                      final lastMessageSender = data["lastMessageSender"] ?? "";
+                      final isMyMessage = lastMessageSender == currentUId;
+
+                      // Only show unread count if there are unread messages AND the last message wasn't sent by me
+                      final hasUnread =
+                          data["unreadCount"] != null &&
+                          data["unreadCount"] > 0 &&
+                          !isMyMessage;
 
                       // Build receiver UserModel
                       final receiver = UserModel(
@@ -162,17 +257,19 @@ class _MessengerScreenState extends State<MessengerScreen> {
                         updatedAt: userData.updatedAt,
                       );
 
-                      return _buildChatItem(doc.id, data, receiver);
+                      return _buildChatItem(doc.id, data, receiver, hasUnread);
                     },
                   );
-                }, childCount: chats.length),
+                }, childCount: filteredChats.length),
               );
             },
           ),
         ],
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () {},
+        onPressed: () {
+          //went to other screen to select user to chat
+        },
         backgroundColor: kSecondary,
         child: Icon(Iconsax.edit, color: kWhite, size: 28),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
@@ -192,6 +289,11 @@ class _MessengerScreenState extends State<MessengerScreen> {
       ),
       cursorColor: kPrimary,
       autofocus: true,
+      onChanged: (value) {
+        setState(() {
+          _searchQuery = value;
+        });
+      },
     );
   }
 
@@ -241,12 +343,12 @@ class _MessengerScreenState extends State<MessengerScreen> {
     String chatId,
     Map<String, dynamic> data,
     UserModel receiver,
+    bool hasUnread,
   ) {
     final lastMessage = data["lastMessage"] ?? "";
     final lastMessageTime = data["lastMessageTime"] != null
         ? (data["lastMessageTime"] as Timestamp).toDate()
         : DateTime.now();
-    final hasUnread = data["unreadCount"] != null && data["unreadCount"] > 0;
 
     return AnimatedContainer(
       duration: Duration(milliseconds: 300),

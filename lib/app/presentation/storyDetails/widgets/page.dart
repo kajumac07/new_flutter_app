@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:new_flutter_app/app/core/constants/constdata.dart';
+import 'package:new_flutter_app/app/core/services/collection_refrence.dart';
 import 'package:new_flutter_app/app/core/utils/toast_msg.dart';
 import 'package:new_flutter_app/app/global/models/travel_story_model.dart';
 import 'package:new_flutter_app/app/global/models/user_model.dart';
 import 'package:new_flutter_app/app/global/widgets/custom_container.dart';
+import 'package:new_flutter_app/app/presentation/followedUsers/followed_user_profile_page.dart';
 import 'package:new_flutter_app/app/presentation/storyDetails/widgets/author_sectioon.dart';
 import 'package:new_flutter_app/app/presentation/storyDetails/widgets/budget_breakdown.dart';
 import 'package:new_flutter_app/app/presentation/storyDetails/widgets/comment_section.dart';
@@ -99,8 +102,6 @@ class _PremiumStoryDetailsScreenState extends State<PremiumStoryDetailsScreen> {
                     ),
 
                     // Location tags
-
-                    // Location tags
                     Positioned(
                       bottom: 40.h,
                       left: 20.w,
@@ -191,12 +192,23 @@ class _PremiumStoryDetailsScreenState extends State<PremiumStoryDetailsScreen> {
 
                     SizedBox(height: 24.h),
                     //Author Section
-                    AuthorSection(
-                      publishedUserId: widget.publishedUserId,
-                      currentUserId: widget.currentUserId,
-                      author: widget.author,
-                      toggleFollow: widget.toggleFollow,
-                      isFollowing: widget.isFollowing,
+                    InkWell(
+                      onTap: () {
+                        if (currentUId != widget.publishedUserId) {
+                          Get.to(
+                            () => FollowedUserProfilePage(user: widget.author),
+                            transition: Transition.rightToLeftWithFade,
+                            duration: Duration(milliseconds: 300),
+                          );
+                        }
+                      },
+                      child: AuthorSection(
+                        publishedUserId: widget.publishedUserId,
+                        currentUserId: widget.currentUserId,
+                        author: widget.author,
+                        toggleFollow: widget.toggleFollow,
+                        isFollowing: widget.isFollowing,
+                      ),
                     ),
 
                     SizedBox(height: 32.h),

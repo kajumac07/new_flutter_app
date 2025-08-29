@@ -37,11 +37,12 @@ class CommunityScreen extends StatelessWidget {
         actions: [
           GlowingIconButton(
             icon: Icons.notifications,
-            badge: true,
+            badgeCount: 0,
             onTap: () => Get.to(() => CloudNotificationScreen()),
           ),
           SizedBox(width: 8.w),
           GlowingIconButton(
+            badgeCount: 0,
             icon: Icons.person,
             onTap: () => Get.to(() => UserProfileScreen()),
           ),

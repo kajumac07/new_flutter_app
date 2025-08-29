@@ -7,7 +7,9 @@ import 'package:iconsax/iconsax.dart';
 import 'package:new_flutter_app/app/core/constants/constdata.dart';
 import 'package:new_flutter_app/app/core/services/collection_refrence.dart';
 import 'package:new_flutter_app/app/global/models/post_model.dart';
+import 'package:new_flutter_app/app/global/models/user_model.dart';
 import 'package:new_flutter_app/app/global/widgets/custom_container.dart';
+import 'package:new_flutter_app/app/presentation/followedUsers/followed_user_profile_page.dart';
 import 'package:new_flutter_app/app/presentation/storyDetails/widgets/gallery_section.dart';
 import 'package:timeago/timeago.dart' as timeago;
 
@@ -31,6 +33,7 @@ class _PostDetailsScreenState extends State<PostDetailsScreen> {
   late String currentUserName = "";
   late String currentUserProfileImage = "";
   bool isLoading = false;
+  late UserModel userModel;
 
   @override
   void initState() {
@@ -71,6 +74,7 @@ class _PostDetailsScreenState extends State<PostDetailsScreen> {
           .get();
 
       if (doc.exists) {
+        userModel = UserModel.fromMap(doc.data()!);
         setState(() {
           userName = doc.data()?['fullName'] ?? 'Unknown User';
           userProfileImage =
@@ -232,7 +236,18 @@ class _PostDetailsScreenState extends State<PostDetailsScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     SizedBox(height: 15.h),
-                    _buildPostHeader(),
+                    InkWell(
+                      onTap: () {
+                        if (currentUId != widget.post.uid) {
+                          Get.to(
+                            () => FollowedUserProfilePage(user: userModel),
+                            transition: Transition.rightToLeftWithFade,
+                            duration: Duration(milliseconds: 300),
+                          );
+                        }
+                      },
+                      child: _buildPostHeader(),
+                    ),
                     SizedBox(height: 20.h),
                     _buildPostContent(),
                     SizedBox(height: 25.h),

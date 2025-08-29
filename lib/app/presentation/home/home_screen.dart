@@ -6,6 +6,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:new_flutter_app/app/core/constants/constdata.dart';
+import 'package:new_flutter_app/app/core/services/collection_refrence.dart';
 import 'package:new_flutter_app/app/core/utils/app_styles.dart';
 import 'package:new_flutter_app/app/global/controller/home_controller.dart';
 import 'package:new_flutter_app/app/global/widgets/glowing_icon_button.dart';
@@ -14,7 +15,6 @@ import 'package:new_flutter_app/app/presentation/home/widgets/categories.dart';
 import 'package:new_flutter_app/app/presentation/home/widgets/drawer.dart';
 import 'package:new_flutter_app/app/presentation/home/widgets/trending_story_widget.dart';
 import 'package:new_flutter_app/app/presentation/messenger/messenger_screen.dart';
-import 'package:new_flutter_app/app/presentation/profile/profile_details_screen.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:get/get.dart';
 
@@ -32,11 +32,46 @@ class _HomeScreenState extends State<HomeScreen> {
       .collection('Stories')
       .get();
   bool isLoading = false;
+  // bool _hasUnreadMessages = false;
+  int unreadMsgCount = 0;
 
   @override
   void initState() {
     fetchTrendingStories();
+    _setupUnreadMessagesListener();
     super.initState();
+  }
+
+  void _setupUnreadMessagesListener() {
+    FirebaseFirestore.instance
+        .collection("Chats")
+        .where("members", arrayContains: currentUId)
+        .snapshots()
+        .listen(
+          (querySnapshot) {
+            if (mounted) {
+              int totalUnread = 0;
+
+              for (final doc in querySnapshot.docs) {
+                final data = doc.data();
+                final lastMessageSender = data["lastMessageSender"] ?? "";
+                final unreadCount = data["unreadCount"] ?? 0;
+
+                // Only count if the last message wasn't sent by current user
+                if (lastMessageSender != currentUId && unreadCount > 0) {
+                  totalUnread += unreadCount as int;
+                }
+              }
+
+              setState(() {
+                unreadMsgCount = totalUnread;
+              });
+            }
+          },
+          onError: (error) {
+            print("Error listening for unread messages: $error");
+          },
+        );
   }
 
   void fetchTrendingStories() async {
@@ -113,7 +148,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         actions: [
                           GlowingIconButton(
                             icon: Icons.notifications,
-                            badge: true,
+                            badgeCount: 0,
                             onTap: () =>
                                 Get.to(() => CloudNotificationScreen()),
                           ),
@@ -121,6 +156,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           SizedBox(width: 5.w),
                           GlowingIconButton(
                             icon: Iconsax.message,
+                            badgeCount: unreadMsgCount,
                             onTap: () => Get.to(
                               () => MessengerScreen(),
                               transition: Transition.rightToLeftWithFade,

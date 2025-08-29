@@ -49,7 +49,9 @@ class AuthorSection extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  author!.fullName,
+                  isCurrentUser
+                      ? "${author!.fullName} (You)"
+                      : author!.fullName,
                   style: GoogleFonts.poppins(
                     fontSize: 16.sp,
                     fontWeight: FontWeight.w600,

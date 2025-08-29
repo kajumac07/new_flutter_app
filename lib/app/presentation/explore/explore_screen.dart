@@ -64,24 +64,24 @@ class ExploreScreen extends StatelessWidget {
                 centerTitle: true,
               ),
 
-              actions: [
-                GlowingIconButton(
-                  icon: Icons.notifications,
-                  badge: true,
-                  onTap: () => Get.to(() => CloudNotificationScreen()),
-                ),
+              // actions: [
+              //   GlowingIconButton(
+              //     icon: Icons.notifications,
+              //     badge: true,
+              //     onTap: () => Get.to(() => CloudNotificationScreen()),
+              //   ),
 
-                SizedBox(width: 5.w),
-                GlowingIconButton(
-                  icon: Icons.person,
-                  onTap: () => Get.to(
-                    () => UserProfileScreen(),
-                    transition: Transition.rightToLeftWithFade,
-                    duration: Duration(milliseconds: 500),
-                  ),
-                ),
-                SizedBox(width: 5.w),
-              ],
+              //   SizedBox(width: 5.w),
+              //   GlowingIconButton(
+              //     icon: Icons.person,
+              //     onTap: () => Get.to(
+              //       () => UserProfileScreen(),
+              //       transition: Transition.rightToLeftWithFade,
+              //       duration: Duration(milliseconds: 500),
+              //     ),
+              //   ),
+              //   SizedBox(width: 5.w),
+              // ],
             ),
 
             // Search Bar with Gradient Background

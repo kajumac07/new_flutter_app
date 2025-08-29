@@ -97,9 +97,9 @@ class _ChatScreenState extends State<ChatScreen>
                   return ChatMessage.fromMap(doc.data());
                 }).toList();
 
-                // Check if there are unread messages
+                // Check if there are unread messages from the other person
                 final unreadMessages = _messages.where((msg) {
-                  return !msg.seen && msg.senderId != currentUId;
+                  return !msg.seen && msg.senderId == widget.receiver.uid;
                 }).toList();
 
                 if (unreadMessages.isNotEmpty) {
@@ -131,19 +131,27 @@ class _ChatScreenState extends State<ChatScreen>
 
   void _markMessagesAsSeen() async {
     try {
-      // Reset unread count for this chat
-      await FirebaseFirestore.instance
+      final chatDoc = await FirebaseFirestore.instance
           .collection("Chats")
           .doc(widget.chatId)
-          .update({"unreadCount": 0});
+          .get();
 
-      // Mark all messages as seen
+      final chatData = chatDoc.data() as Map<String, dynamic>;
+      final lastMessageSender = chatData["lastMessageSender"] ?? "";
+
+      if (lastMessageSender != currentUId) {
+        await FirebaseFirestore.instance
+            .collection("Chats")
+            .doc(widget.chatId)
+            .update({"unreadCount": 0});
+      }
+
       final messagesSnapshot = await FirebaseFirestore.instance
           .collection("Chats")
           .doc(widget.chatId)
           .collection("messages")
           .where('seen', isEqualTo: false)
-          .where('senderId', isNotEqualTo: currentUId)
+          .where('senderId', isEqualTo: widget.receiver.uid)
           .get();
 
       final batch = FirebaseFirestore.instance.batch();
@@ -171,12 +179,14 @@ class _ChatScreenState extends State<ChatScreen>
     );
 
     try {
+      // Add the message first
       await FirebaseFirestore.instance
           .collection("Chats")
           .doc(widget.chatId)
           .collection("messages")
           .add(message.toMap());
 
+      // Update chat metadata - only increment unread count for the receiver
       await FirebaseFirestore.instance
           .collection("Chats")
           .doc(widget.chatId)
@@ -185,6 +195,7 @@ class _ChatScreenState extends State<ChatScreen>
             "lastMessage": message.text,
             "lastMessageTime": message.timestamp,
             "unreadCount": FieldValue.increment(1),
+            "lastMessageSender": currentUId,
           }, SetOptions(merge: true));
 
       _controller.clear();
