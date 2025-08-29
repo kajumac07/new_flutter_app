@@ -14,6 +14,7 @@ import 'package:new_flutter_app/app/presentation/cloudNotificationScreen/cloud_n
 import 'package:new_flutter_app/app/presentation/home/widgets/categories.dart';
 import 'package:new_flutter_app/app/presentation/home/widgets/drawer.dart';
 import 'package:new_flutter_app/app/presentation/home/widgets/trending_story_widget.dart';
+import 'package:new_flutter_app/app/presentation/invitationScreen/invitation_screen.dart';
 import 'package:new_flutter_app/app/presentation/messenger/messenger_screen.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:get/get.dart';
@@ -149,8 +150,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           GlowingIconButton(
                             icon: Icons.notifications,
                             badgeCount: 0,
-                            onTap: () =>
-                                Get.to(() => CloudNotificationScreen()),
+                            onTap: () => Get.to(() => InvitationScreen()),
                           ),
 
                           SizedBox(width: 5.w),
