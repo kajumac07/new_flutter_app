@@ -277,68 +277,6 @@ class _MessengerScreenState extends State<MessengerScreen> {
     );
   }
 
-  Widget _buildSearchField() {
-    return TextField(
-      controller: _searchController,
-      style: TextStyle(color: kWhite, fontSize: 18),
-      decoration: InputDecoration(
-        hintText: "Search conversations...",
-        hintStyle: TextStyle(color: kWhite.withOpacity(0.6)),
-        border: InputBorder.none,
-        contentPadding: EdgeInsets.zero,
-      ),
-      cursorColor: kPrimary,
-      autofocus: true,
-      onChanged: (value) {
-        setState(() {
-          _searchQuery = value;
-        });
-      },
-    );
-  }
-
-  Widget _buildShimmerItem() {
-    return Shimmer.fromColors(
-      baseColor: Colors.grey.shade800,
-      highlightColor: Colors.grey.shade700,
-      child: Container(
-        margin: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        padding: EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: Colors.black.withOpacity(0.3),
-          borderRadius: BorderRadius.circular(20),
-        ),
-        child: Row(
-          children: [
-            Container(
-              width: 60,
-              height: 60,
-              decoration: BoxDecoration(
-                color: Colors.white,
-                shape: BoxShape.circle,
-              ),
-            ),
-            SizedBox(width: 16),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Container(
-                    width: double.infinity,
-                    height: 16,
-                    color: Colors.white,
-                  ),
-                  SizedBox(height: 8),
-                  Container(width: 120, height: 14, color: Colors.white),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
   Widget _buildChatItem(
     String chatId,
     Map<String, dynamic> data,
@@ -487,6 +425,68 @@ class _MessengerScreenState extends State<MessengerScreen> {
               ],
             ),
           ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSearchField() {
+    return TextField(
+      controller: _searchController,
+      style: TextStyle(color: kWhite, fontSize: 18),
+      decoration: InputDecoration(
+        hintText: "Search conversations...",
+        hintStyle: TextStyle(color: kWhite.withOpacity(0.6)),
+        border: InputBorder.none,
+        contentPadding: EdgeInsets.zero,
+      ),
+      cursorColor: kPrimary,
+      autofocus: true,
+      onChanged: (value) {
+        setState(() {
+          _searchQuery = value;
+        });
+      },
+    );
+  }
+
+  Widget _buildShimmerItem() {
+    return Shimmer.fromColors(
+      baseColor: Colors.grey.shade800,
+      highlightColor: Colors.grey.shade700,
+      child: Container(
+        margin: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        padding: EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Colors.black.withOpacity(0.3),
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 60,
+              height: 60,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                shape: BoxShape.circle,
+              ),
+            ),
+            SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Container(
+                    width: double.infinity,
+                    height: 16,
+                    color: Colors.white,
+                  ),
+                  SizedBox(height: 8),
+                  Container(width: 120, height: 14, color: Colors.white),
+                ],
+              ),
+            ),
+          ],
         ),
       ),
     );

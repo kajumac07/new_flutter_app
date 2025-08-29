@@ -12,6 +12,7 @@ import 'package:new_flutter_app/app/presentation/followedUsers/widgets/posts_lis
 import 'package:new_flutter_app/app/presentation/followedUsers/widgets/stories_lists.dart';
 import 'package:new_flutter_app/app/presentation/messenger/widgets/chat_screen.dart';
 import 'package:iconsax/iconsax.dart';
+import 'package:new_flutter_app/app/presentation/profile/widgets/user_lists_bottom_sheet.dart';
 
 class FollowedUserProfilePage extends StatefulWidget {
   final UserModel user;
@@ -333,9 +334,39 @@ class _FollowedUserProfilePageState extends State<FollowedUserProfilePage>
           _buildVerticalDivider(),
           _buildStatItem(widget.user.stories.length.toString(), 'Stories'),
           _buildVerticalDivider(),
-          _buildStatItem(widget.user.followers.length.toString(), 'Followers'),
+          InkWell(
+            onTap: () {
+              Get.to(
+                () => UsersListBottomSheet(
+                  userIds: widget.user.following,
+                  title: "Followers",
+                ),
+                transition: Transition.native,
+                duration: const Duration(milliseconds: 300),
+              );
+            },
+            child: _buildStatItem(
+              widget.user.followers.length.toString(),
+              'Followers',
+            ),
+          ),
           _buildVerticalDivider(),
-          _buildStatItem(widget.user.following.length.toString(), 'Following'),
+          InkWell(
+            onTap: () {
+              Get.to(
+                () => UsersListBottomSheet(
+                  userIds: widget.user.following,
+                  title: "Followers",
+                ),
+                transition: Transition.native,
+                duration: const Duration(milliseconds: 300),
+              );
+            },
+            child: _buildStatItem(
+              widget.user.following.length.toString(),
+              'Following',
+            ),
+          ),
         ],
       ),
     );

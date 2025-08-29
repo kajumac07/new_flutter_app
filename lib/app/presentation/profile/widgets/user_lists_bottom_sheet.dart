@@ -270,7 +270,9 @@ class UsersListBottomSheet extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  user.fullName,
+                  currentUId == user.uid
+                      ? "${user.fullName} (You)"
+                      : user.fullName,
                   style: appStyleLato(16, kWhite, FontWeight.w600),
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -426,15 +428,6 @@ class _CustomFollowButtonState extends State<CustomFollowButton> {
                 end: Alignment.bottomRight,
               ),
         borderRadius: BorderRadius.circular(18),
-        // boxShadow: [
-        //   BoxShadow(
-        //     color: isFollowing
-        //         ? Colors.blue.withOpacity(0.3)
-        //         : Colors.pink.withOpacity(0.3),
-        //     blurRadius: 8,
-        //     offset: Offset(0, 4),
-        //   ),
-        // ],
       ),
       child: ElevatedButton(
         onPressed: isLoading ? null : _toggleFollow,
