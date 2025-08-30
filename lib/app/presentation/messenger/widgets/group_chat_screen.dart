@@ -4,8 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:new_flutter_app/app/core/constants/constdata.dart';
-import 'package:new_flutter_app/app/core/services/collection_refrence.dart';
 import 'package:new_flutter_app/app/core/utils/app_styles.dart';
+import 'package:new_flutter_app/app/presentation/createGroup/widgets/group_details_screen.dart';
 
 class GroupChatScreen extends StatefulWidget {
   final String groupId;
@@ -146,7 +146,7 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
                   });
 
               Get.back();
-              Get.back(); // Go back to previous screen
+              Get.back();
               Get.snackbar(
                 "Left Group",
                 "You have left the group",
@@ -210,89 +210,99 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
                     ),
                   ],
                 ),
-                child: Row(
-                  children: [
-                    IconButton(
-                      icon: Icon(Iconsax.arrow_left, color: kWhite, size: 24),
-                      onPressed: () => Get.back(),
-                    ),
-                    SizedBox(width: 12),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            groupName,
-                            style: appStyle(18, kWhite, FontWeight.w700),
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                          StreamBuilder<QuerySnapshot>(
-                            stream: FirebaseFirestore.instance
-                                .collection("groups")
-                                .doc(widget.groupId)
-                                .collection("messages")
-                                .orderBy("timestamp", descending: true)
-                                .limit(1)
-                                .snapshots(),
-                            builder: (context, messageSnapshot) {
-                              if (messageSnapshot.hasData &&
-                                  messageSnapshot.data!.docs.isNotEmpty) {
-                                final lastMessage =
-                                    messageSnapshot.data!.docs.first;
-                                final senderId = lastMessage['senderId'];
-                                final isYou = senderId == currentUser.uid;
+                child: InkWell(
+                  onTap: () {
+                    //send to group details screen
+                    Get.to(() => GroupDetailsScreen(groupId: widget.groupId));
+                  },
+                  child: Row(
+                    children: [
+                      IconButton(
+                        icon: Icon(Iconsax.arrow_left, color: kWhite, size: 24),
+                        onPressed: () => Get.back(),
+                      ),
+                      SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              groupName,
+                              style: appStyle(18, kWhite, FontWeight.w700),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            StreamBuilder<QuerySnapshot>(
+                              stream: FirebaseFirestore.instance
+                                  .collection("groups")
+                                  .doc(widget.groupId)
+                                  .collection("messages")
+                                  .orderBy("timestamp", descending: true)
+                                  .limit(1)
+                                  .snapshots(),
+                              builder: (context, messageSnapshot) {
+                                if (messageSnapshot.hasData &&
+                                    messageSnapshot.data!.docs.isNotEmpty) {
+                                  final lastMessage =
+                                      messageSnapshot.data!.docs.first;
+                                  final senderId = lastMessage['senderId'];
+                                  final isYou = senderId == currentUser.uid;
 
+                                  return Text(
+                                    isYou
+                                        ? "You: ${lastMessage['text']}"
+                                        : "${_userNames[senderId] ?? 'Someone'}: ${lastMessage['text']}",
+                                    style: appStyle(
+                                      12,
+                                      kSecondary,
+                                      FontWeight.normal,
+                                    ),
+                                    overflow: TextOverflow.ellipsis,
+                                  );
+                                }
                                 return Text(
-                                  isYou
-                                      ? "You: ${lastMessage['text']}"
-                                      : "${_userNames[senderId] ?? 'Someone'}: ${lastMessage['text']}",
+                                  "Start a conversation",
                                   style: appStyle(
                                     12,
                                     kSecondary,
                                     FontWeight.normal,
                                   ),
-                                  overflow: TextOverflow.ellipsis,
                                 );
-                              }
-                              return Text(
-                                "Start a conversation",
-                                style: appStyle(
-                                  12,
-                                  kSecondary,
-                                  FontWeight.normal,
+                              },
+                            ),
+                          ],
+                        ),
+                      ),
+                      PopupMenuButton(
+                        icon: Icon(Iconsax.more, color: kWhite),
+                        itemBuilder: (context) => [
+                          PopupMenuItem(
+                            value: 'leave',
+                            child: Row(
+                              children: [
+                                Icon(
+                                  Iconsax.logout,
+                                  color: Colors.red,
+                                  size: 20,
                                 ),
-                              );
-                            },
+                                SizedBox(width: 8),
+                                Text(
+                                  "Leave Group",
+                                  style: appStyle(
+                                    14,
+                                    Colors.red,
+                                    FontWeight.normal,
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
                         ],
+                        onSelected: (value) {
+                          if (value == 'leave') _leaveGroup();
+                        },
                       ),
-                    ),
-                    PopupMenuButton(
-                      icon: Icon(Iconsax.more, color: kWhite),
-                      itemBuilder: (context) => [
-                        PopupMenuItem(
-                          value: 'leave',
-                          child: Row(
-                            children: [
-                              Icon(Iconsax.logout, color: Colors.red, size: 20),
-                              SizedBox(width: 8),
-                              Text(
-                                "Leave Group",
-                                style: appStyle(
-                                  14,
-                                  Colors.red,
-                                  FontWeight.normal,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                      onSelected: (value) {
-                        if (value == 'leave') _leaveGroup();
-                      },
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               );
             },

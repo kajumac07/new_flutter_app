@@ -100,6 +100,9 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
         id: groupDoc.id,
         groupName: _groupNameController.text,
         creatorId: currentUser.uid,
+        groupDescription: "Group Description",
+        groupPicture:
+            "https://firebasestorage.googleapis.com/v0/b/rabbit-service-d3d90.appspot.com/o/profile.png?alt=media&token=43b149e9-b4ee-458f-8271-5946b77ff658",
         members: [currentUser.uid],
         pendingInvites: _selectedMembers,
         createdAt: Timestamp.now(),
