@@ -8,6 +8,8 @@ import 'package:new_flutter_app/app/core/constants/constdata.dart';
 import 'package:new_flutter_app/app/core/utils/app_styles.dart';
 import 'dart:io';
 
+import 'package:new_flutter_app/app/global/widgets/custom_container.dart';
+
 class GroupDetailsScreen extends StatefulWidget {
   final String groupId;
   const GroupDetailsScreen({super.key, required this.groupId});
@@ -204,339 +206,350 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF0F172A),
-      body: StreamBuilder<DocumentSnapshot>(
-        stream: FirebaseFirestore.instance
-            .collection("groups")
-            .doc(widget.groupId)
-            .snapshots(),
-        builder: (context, snapshot) {
-          if (!snapshot.hasData) {
-            return Center(
-              child: CircularProgressIndicator(color: Color(0xFFE94560)),
-            );
-          }
+      backgroundColor: Colors.transparent,
+      body: CustomGradientContainer(
+        child: StreamBuilder<DocumentSnapshot>(
+          stream: FirebaseFirestore.instance
+              .collection("groups")
+              .doc(widget.groupId)
+              .snapshots(),
+          builder: (context, snapshot) {
+            if (!snapshot.hasData) {
+              return Center(
+                child: CircularProgressIndicator(color: Color(0xFFE94560)),
+              );
+            }
 
-          final groupData = snapshot.data!.data() as Map<String, dynamic>;
-          final isAdmin = groupData['creatorId'] == currentUser.uid;
-          final members = List<String>.from(groupData['members'] ?? []);
+            final groupData = snapshot.data!.data() as Map<String, dynamic>;
+            final isAdmin = groupData['creatorId'] == currentUser.uid;
+            final members = List<String>.from(groupData['members'] ?? []);
 
-          if (!_isEditing) {
-            _descController.text = groupData['groupDescription'] ?? '';
-            _nameController.text = groupData['groupName'] ?? '';
-          }
+            if (!_isEditing) {
+              _descController.text = groupData['groupDescription'] ?? '';
+              _nameController.text = groupData['groupName'] ?? '';
+            }
 
-          return CustomScrollView(
-            slivers: [
-              // Header with group image and name
-              SliverAppBar(
-                expandedHeight: 250.0,
-                backgroundColor: kCardColor,
-                flexibleSpace: FlexibleSpaceBar(
-                  background: Stack(
-                    children: [
-                      // Group image with gradient overlay
-                      Container(
-                        decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            begin: Alignment.topCenter,
-                            end: Alignment.bottomCenter,
-                            colors: [
-                              Colors.transparent,
-                              Color(0xFF0F172A).withOpacity(0.8),
-                            ],
+            return CustomScrollView(
+              slivers: [
+                // Header with group image and name
+                SliverAppBar(
+                  expandedHeight: 250.0,
+                  backgroundColor: kCardColor,
+                  flexibleSpace: FlexibleSpaceBar(
+                    background: Stack(
+                      children: [
+                        // Group image with gradient overlay
+                        Container(
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              begin: Alignment.topCenter,
+                              end: Alignment.bottomCenter,
+                              colors: [
+                                Colors.transparent,
+                                Color(0xFF0F172A).withOpacity(0.8),
+                              ],
+                            ),
                           ),
+                          child: _selectedImage != null
+                              ? Image.file(
+                                  _selectedImage!,
+                                  fit: BoxFit.cover,
+                                  width: double.infinity,
+                                  height: double.infinity,
+                                )
+                              : groupData['groupPicture'] != null &&
+                                    groupData['groupPicture'].isNotEmpty
+                              ? Image.network(
+                                  groupData['groupPicture'],
+                                  fit: BoxFit.cover,
+                                  width: double.infinity,
+                                  height: double.infinity,
+                                )
+                              : Container(
+                                  color: Color(0xFF1E293B),
+                                  child: Icon(
+                                    Iconsax.people,
+                                    size: 80,
+                                    color: kSecondary,
+                                  ),
+                                ),
                         ),
-                        child: _selectedImage != null
-                            ? Image.file(
-                                _selectedImage!,
-                                fit: BoxFit.cover,
-                                width: double.infinity,
-                                height: double.infinity,
+                        // Edit button for admin
+                        if (isAdmin && _isEditing)
+                          Positioned(
+                            bottom: 16,
+                            right: 16,
+                            child: FloatingActionButton(
+                              onPressed: _pickImage,
+                              backgroundColor: Color(0xFFE94560),
+                              mini: true,
+                              child: Icon(Iconsax.camera, color: kWhite),
+                            ),
+                          ),
+                      ],
+                    ),
+                  ),
+                  pinned: true,
+                  actions: [
+                    if (isAdmin)
+                      IconButton(
+                        icon: Icon(
+                          _isEditing ? Iconsax.close_circle : Iconsax.edit_2,
+                          color: kWhite,
+                        ),
+                        onPressed: () {
+                          if (_isEditing) {
+                            setState(() {
+                              _isEditing = false;
+                              _selectedImage = null;
+                              _descController.text =
+                                  groupData['groupDescription'] ?? '';
+                              _nameController.text =
+                                  groupData['groupName'] ?? '';
+                            });
+                          } else {
+                            setState(() => _isEditing = true);
+                          }
+                        },
+                      ),
+                  ],
+                ),
+
+                // Group details section
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding: const EdgeInsets.all(20.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // Group name (editable for admin)
+                        _isEditing && isAdmin
+                            ? TextField(
+                                controller: _nameController,
+                                style: appStyle(24, kWhite, FontWeight.bold),
+                                decoration: InputDecoration(
+                                  hintText: "Group Name",
+                                  hintStyle: appStyle(
+                                    24,
+                                    kSecondary,
+                                    FontWeight.bold,
+                                  ),
+                                  border: InputBorder.none,
+                                ),
                               )
-                            : groupData['groupPicture'] != null &&
-                                  groupData['groupPicture'].isNotEmpty
-                            ? Image.network(
-                                groupData['groupPicture'],
-                                fit: BoxFit.cover,
-                                width: double.infinity,
-                                height: double.infinity,
+                            : Text(
+                                groupData['groupName'] ?? 'Unnamed Group',
+                                style: appStyle(24, kWhite, FontWeight.bold),
+                              ),
+
+                        SizedBox(height: 8),
+
+                        // Members count
+                        Text(
+                          "${members.length} members",
+                          style: appStyle(14, kSecondary, FontWeight.normal),
+                        ),
+
+                        SizedBox(height: 20),
+
+                        // Group description section
+                        Text(
+                          "Description",
+                          style: appStyle(16, kWhite, FontWeight.w600),
+                        ),
+
+                        SizedBox(height: 8),
+
+                        // Group description (editable for admin)
+                        _isEditing && isAdmin
+                            ? TextField(
+                                controller: _descController,
+                                style: appStyle(14, kWhite, FontWeight.normal),
+                                maxLines: 3,
+                                decoration: InputDecoration(
+                                  hintText: "Add a group description...",
+                                  hintStyle: appStyle(
+                                    14,
+                                    kSecondary,
+                                    FontWeight.normal,
+                                  ),
+                                  filled: true,
+                                  fillColor: Color(0xFF1E293B),
+                                  border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                    borderSide: BorderSide.none,
+                                  ),
+                                  contentPadding: EdgeInsets.all(16),
+                                ),
                               )
                             : Container(
-                                color: Color(0xFF1E293B),
-                                child: Icon(
-                                  Iconsax.people,
-                                  size: 80,
-                                  color: kSecondary,
-                                ),
-                              ),
-                      ),
-                      // Edit button for admin
-                      if (isAdmin && _isEditing)
-                        Positioned(
-                          bottom: 16,
-                          right: 16,
-                          child: FloatingActionButton(
-                            onPressed: _pickImage,
-                            backgroundColor: Color(0xFFE94560),
-                            mini: true,
-                            child: Icon(Iconsax.camera, color: kWhite),
-                          ),
-                        ),
-                    ],
-                  ),
-                ),
-                pinned: true,
-                actions: [
-                  if (isAdmin)
-                    IconButton(
-                      icon: Icon(
-                        _isEditing ? Iconsax.close_circle : Iconsax.edit_2,
-                        color: kWhite,
-                      ),
-                      onPressed: () {
-                        if (_isEditing) {
-                          setState(() {
-                            _isEditing = false;
-                            _selectedImage = null;
-                            _descController.text =
-                                groupData['groupDescription'] ?? '';
-                            _nameController.text = groupData['groupName'] ?? '';
-                          });
-                        } else {
-                          setState(() => _isEditing = true);
-                        }
-                      },
-                    ),
-                ],
-              ),
-
-              // Group details section
-              SliverToBoxAdapter(
-                child: Padding(
-                  padding: const EdgeInsets.all(20.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // Group name (editable for admin)
-                      _isEditing && isAdmin
-                          ? TextField(
-                              controller: _nameController,
-                              style: appStyle(24, kWhite, FontWeight.bold),
-                              decoration: InputDecoration(
-                                hintText: "Group Name",
-                                hintStyle: appStyle(
-                                  24,
-                                  kSecondary,
-                                  FontWeight.bold,
-                                ),
-                                border: InputBorder.none,
-                              ),
-                            )
-                          : Text(
-                              groupData['groupName'] ?? 'Unnamed Group',
-                              style: appStyle(24, kWhite, FontWeight.bold),
-                            ),
-
-                      SizedBox(height: 8),
-
-                      // Members count
-                      Text(
-                        "${members.length} members",
-                        style: appStyle(14, kSecondary, FontWeight.normal),
-                      ),
-
-                      SizedBox(height: 20),
-
-                      // Group description section
-                      Text(
-                        "Description",
-                        style: appStyle(16, kWhite, FontWeight.w600),
-                      ),
-
-                      SizedBox(height: 8),
-
-                      // Group description (editable for admin)
-                      _isEditing && isAdmin
-                          ? TextField(
-                              controller: _descController,
-                              style: appStyle(14, kWhite, FontWeight.normal),
-                              maxLines: 3,
-                              decoration: InputDecoration(
-                                hintText: "Add a group description...",
-                                hintStyle: appStyle(
-                                  14,
-                                  kSecondary,
-                                  FontWeight.normal,
-                                ),
-                                filled: true,
-                                fillColor: Color(0xFF1E293B),
-                                border: OutlineInputBorder(
+                                width: double.infinity,
+                                padding: EdgeInsets.all(16),
+                                decoration: BoxDecoration(
+                                  color: Color(0xFF1E293B),
                                   borderRadius: BorderRadius.circular(12),
-                                  borderSide: BorderSide.none,
                                 ),
-                                contentPadding: EdgeInsets.all(16),
-                              ),
-                            )
-                          : Container(
-                              width: double.infinity,
-                              padding: EdgeInsets.all(16),
-                              decoration: BoxDecoration(
-                                color: Color(0xFF1E293B),
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              child: Text(
-                                groupData['groupDescription']?.isNotEmpty ==
-                                        true
-                                    ? groupData['groupDescription']
-                                    : "No description added yet",
-                                style: appStyle(
-                                  14,
+                                child: Text(
                                   groupData['groupDescription']?.isNotEmpty ==
                                           true
-                                      ? kWhite
-                                      : kSecondary,
-                                  FontWeight.normal,
+                                      ? groupData['groupDescription']
+                                      : "No description added yet",
+                                  style: appStyle(
+                                    14,
+                                    groupData['groupDescription']?.isNotEmpty ==
+                                            true
+                                        ? kWhite
+                                        : kSecondary,
+                                    FontWeight.normal,
+                                  ),
                                 ),
                               ),
+
+                        SizedBox(height: 20),
+
+                        // Save button when editing
+                        if (_isEditing && isAdmin)
+                          SizedBox(
+                            width: double.infinity,
+                            child: ElevatedButton(
+                              onPressed: _isLoading
+                                  ? null
+                                  : _updateGroupDetails,
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Color(0xFFE94560),
+                                padding: EdgeInsets.symmetric(vertical: 16),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                              ),
+                              child: _isLoading
+                                  ? SizedBox(
+                                      width: 20,
+                                      height: 20,
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2,
+                                        color: kWhite,
+                                      ),
+                                    )
+                                  : Text(
+                                      "Save Changes",
+                                      style: appStyle(
+                                        16,
+                                        kWhite,
+                                        FontWeight.w600,
+                                      ),
+                                    ),
                             ),
+                          ),
 
-                      SizedBox(height: 20),
+                        SizedBox(height: 30),
 
-                      // Save button when editing
-                      if (_isEditing && isAdmin)
-                        SizedBox(
-                          width: double.infinity,
-                          child: ElevatedButton(
-                            onPressed: _isLoading ? null : _updateGroupDetails,
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Color(0xFFE94560),
-                              padding: EdgeInsets.symmetric(vertical: 16),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12),
+                        // Members section header
+                        Row(
+                          children: [
+                            Text(
+                              "Members",
+                              style: appStyle(16, kWhite, FontWeight.w600),
+                            ),
+                            SizedBox(width: 8),
+                            Text(
+                              "(${members.length})",
+                              style: appStyle(
+                                14,
+                                kSecondary,
+                                FontWeight.normal,
                               ),
                             ),
-                            child: _isLoading
-                                ? SizedBox(
-                                    width: 20,
-                                    height: 20,
-                                    child: CircularProgressIndicator(
-                                      strokeWidth: 2,
-                                      color: kWhite,
-                                    ),
-                                  )
-                                : Text(
-                                    "Save Changes",
-                                    style: appStyle(
-                                      16,
-                                      kWhite,
-                                      FontWeight.w600,
-                                    ),
-                                  ),
-                          ),
+                          ],
                         ),
-
-                      SizedBox(height: 30),
-
-                      // Members section header
-                      Row(
-                        children: [
-                          Text(
-                            "Members",
-                            style: appStyle(16, kWhite, FontWeight.w600),
-                          ),
-                          SizedBox(width: 8),
-                          Text(
-                            "(${members.length})",
-                            style: appStyle(14, kSecondary, FontWeight.normal),
-                          ),
-                        ],
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
-              ),
 
-              // Members list
-              SliverList(
-                delegate: SliverChildBuilderDelegate((context, index) {
-                  final memberId = members[index];
-                  return FutureBuilder<DocumentSnapshot>(
-                    future: FirebaseFirestore.instance
-                        .collection("Persons")
-                        .doc(memberId)
-                        .get(),
-                    builder: (context, userSnapshot) {
-                      final userData =
-                          userSnapshot.hasData && userSnapshot.data!.exists
-                          ? userSnapshot.data!.data() as Map<String, dynamic>
-                          : null;
+                // Members list
+                SliverList(
+                  delegate: SliverChildBuilderDelegate((context, index) {
+                    final memberId = members[index];
+                    return FutureBuilder<DocumentSnapshot>(
+                      future: FirebaseFirestore.instance
+                          .collection("Persons")
+                          .doc(memberId)
+                          .get(),
+                      builder: (context, userSnapshot) {
+                        final userData =
+                            userSnapshot.hasData && userSnapshot.data!.exists
+                            ? userSnapshot.data!.data() as Map<String, dynamic>
+                            : null;
 
-                      final userName = userData?['fullName'] ?? 'Unknown User';
-                      final userImage = userData?['profilePicture'];
-                      final isUserAdmin = memberId == groupData['groupCreator'];
+                        final userName =
+                            userData?['fullName'] ?? 'Unknown User';
+                        final userImage = userData?['profilePicture'];
+                        final isUserAdmin =
+                            memberId == groupData['groupCreator'];
 
-                      return ListTile(
-                        leading: Container(
-                          width: 50,
-                          height: 50,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            gradient: LinearGradient(
-                              colors: [
-                                Color(0xFFFD1D1D),
-                                Color(0xFF833AB4),
-                                Color(0xFF405DE6),
-                              ],
-                              begin: Alignment.topLeft,
-                              end: Alignment.bottomRight,
+                        return ListTile(
+                          leading: Container(
+                            width: 50,
+                            height: 50,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              gradient: LinearGradient(
+                                colors: [
+                                  Color(0xFFFD1D1D),
+                                  Color(0xFF833AB4),
+                                  Color(0xFF405DE6),
+                                ],
+                                begin: Alignment.topLeft,
+                                end: Alignment.bottomRight,
+                              ),
+                            ),
+                            child: CircleAvatar(
+                              backgroundColor: kCardColor,
+                              backgroundImage:
+                                  userImage != null && userImage.isNotEmpty
+                                  ? NetworkImage(userImage)
+                                  : null,
+                              child: userImage == null || userImage.isEmpty
+                                  ? Icon(Iconsax.user, color: kWhite)
+                                  : null,
                             ),
                           ),
-                          child: CircleAvatar(
-                            backgroundColor: kCardColor,
-                            backgroundImage:
-                                userImage != null && userImage.isNotEmpty
-                                ? NetworkImage(userImage)
-                                : null,
-                            child: userImage == null || userImage.isEmpty
-                                ? Icon(Iconsax.user, color: kWhite)
-                                : null,
+                          title: Text(
+                            userName,
+                            style: appStyle(16, kWhite, FontWeight.normal),
                           ),
-                        ),
-                        title: Text(
-                          userName,
-                          style: appStyle(16, kWhite, FontWeight.normal),
-                        ),
-                        subtitle: isUserAdmin
-                            ? Text(
-                                "Group Admin",
-                                style: appStyle(
-                                  12,
-                                  Color(0xFFE94560),
-                                  FontWeight.normal,
-                                ),
-                              )
-                            : null,
-                        trailing:
-                            (isAdmin && memberId != currentUser.uid) ||
-                                (!isAdmin && memberId == currentUser.uid)
-                            ? IconButton(
-                                icon: Icon(
-                                  Iconsax.trash,
-                                  color: kSecondary,
-                                  size: 20,
-                                ),
-                                onPressed: () => _removeMember(memberId),
-                              )
-                            : null,
-                      );
-                    },
-                  );
-                }, childCount: members.length),
-              ),
-            ],
-          );
-        },
+                          subtitle: isUserAdmin
+                              ? Text(
+                                  "Group Admin",
+                                  style: appStyle(
+                                    12,
+                                    Color(0xFFE94560),
+                                    FontWeight.normal,
+                                  ),
+                                )
+                              : null,
+                          trailing:
+                              (isAdmin && memberId != currentUser.uid) ||
+                                  (!isAdmin && memberId == currentUser.uid)
+                              ? IconButton(
+                                  icon: Icon(
+                                    Iconsax.trash,
+                                    color: kSecondary,
+                                    size: 20,
+                                  ),
+                                  onPressed: () => _removeMember(memberId),
+                                )
+                              : null,
+                        );
+                      },
+                    );
+                  }, childCount: members.length),
+                ),
+              ],
+            );
+          },
+        ),
       ),
     );
   }
