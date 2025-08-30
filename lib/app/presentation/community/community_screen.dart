@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
+import 'package:iconsax/iconsax.dart';
 import 'package:new_flutter_app/app/core/constants/constdata.dart';
 import 'package:new_flutter_app/app/core/services/collection_refrence.dart';
 import 'package:new_flutter_app/app/core/utils/app_styles.dart';
@@ -319,7 +320,106 @@ class _CommunityScreenState extends State<CommunityScreen> {
           );
         }),
       ),
-      floatingActionButton: FloatingActionButton(onPressed: () {}),
+      floatingActionButton: Obx(() {
+        if (controller.isMember.value) {
+          return FloatingActionButton(
+            onPressed: () {
+              showModalBottomSheet(
+                context: context,
+                backgroundColor: Colors.transparent,
+                isScrollControlled: true,
+                builder: (context) {
+                  return Container(
+                    padding: EdgeInsets.all(20),
+                    decoration: BoxDecoration(
+                      color: kCardColor,
+                      borderRadius: BorderRadius.vertical(
+                        top: Radius.circular(28),
+                      ),
+                    ),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Container(
+                          width: 50,
+                          height: 5,
+                          margin: EdgeInsets.only(bottom: 16),
+                          decoration: BoxDecoration(
+                            color: Colors.grey[600],
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                        ),
+                        Text(
+                          "Choose an option",
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: kWhite,
+                          ),
+                        ),
+                        SizedBox(height: 20),
+                        // New Conversation
+                        ListTile(
+                          leading: CircleAvatar(
+                            backgroundColor: kSecondary.withOpacity(0.1),
+                            child: Icon(Iconsax.story1, color: kSecondary),
+                          ),
+                          title: Text(
+                            "Create Community Post",
+                            style: TextStyle(color: kWhite, fontSize: 16),
+                          ),
+                          trailing: Icon(
+                            Iconsax.arrow_right_3,
+                            color: kSecondary,
+                          ),
+                          onTap: () {
+                            Navigator.pop(context);
+                            // Navigate to user selection screen
+                          },
+                        ),
+                        Divider(color: Colors.grey[700]),
+                        // Create Group
+                        ListTile(
+                          leading: CircleAvatar(
+                            backgroundColor: Colors.blueAccent.withOpacity(0.1),
+                            child: Icon(
+                              Iconsax.people,
+                              color: Colors.blueAccent,
+                            ),
+                          ),
+                          title: Text(
+                            "Start a Discussion",
+                            style: TextStyle(color: kWhite, fontSize: 16),
+                          ),
+                          trailing: Icon(
+                            Iconsax.arrow_right_3,
+                            color: Colors.blueAccent,
+                          ),
+                          onTap: () {
+                            Navigator.pop(context);
+                            Get.to(
+                              () => Container(),
+                              transition: Transition.leftToRight,
+                            );
+                          },
+                        ),
+                        SizedBox(height: 10),
+                      ],
+                    ),
+                  );
+                },
+              );
+            },
+            backgroundColor: kSecondary,
+            child: Icon(Iconsax.edit, color: kWhite, size: 28),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+            ),
+          );
+        } else {
+          return SizedBox.shrink(); // Hide FAB when not a member
+        }
+      }),
     );
   }
 }

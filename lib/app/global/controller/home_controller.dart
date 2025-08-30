@@ -14,6 +14,26 @@ class HomeScreenController extends GetxController {
     fetchCategories();
   }
 
+  // void fetchCategories() async {
+  //   try {
+  //     final snapshot = await FirebaseFirestore.instance
+  //         .collection("Categories")
+  //         // .where("isCommunity", isEqualTo: true)
+  //         .get();
+
+  //     categoryList = snapshot.docs.map((doc) {
+  //       return CategoryModel.fromDoc(doc.id, doc.data());
+  //     }).toList();
+
+  //     update(); // Trigger UI update if using GetBuilder
+  //   } catch (e) {
+  //     showToastMessage("Error", e.toString(), kRed);
+  //   } finally {
+  //     isLoading = false;
+  //     update(); // Ensure UI updates after loading
+  //   }
+  // }
+
   void fetchCategories() async {
     try {
       final snapshot = await FirebaseFirestore.instance
@@ -21,7 +41,14 @@ class HomeScreenController extends GetxController {
           .get();
 
       categoryList = snapshot.docs.map((doc) {
-        return CategoryModel.fromDoc(doc.id, doc.data());
+        // build model
+        final model = CategoryModel.fromDoc(doc.id, doc.data());
+
+        final filteredLists = model.lists
+            .where((item) => item.isCommunity == false)
+            .toList();
+
+        return CategoryModel(id: model.id, lists: filteredLists);
       }).toList();
 
       update(); // Trigger UI update if using GetBuilder
@@ -29,7 +56,7 @@ class HomeScreenController extends GetxController {
       showToastMessage("Error", e.toString(), kRed);
     } finally {
       isLoading = false;
-      update(); // Ensure UI updates after loading
+      update();
     }
   }
 }

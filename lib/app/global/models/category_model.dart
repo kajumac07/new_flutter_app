@@ -18,18 +18,30 @@ class CategoryItem {
   final String id;
   final String emoji;
   final String label;
+  final bool isCommunity;
 
-  CategoryItem({required this.id, required this.emoji, required this.label});
+  CategoryItem({
+    required this.id,
+    required this.emoji,
+    required this.label,
+    required this.isCommunity,
+  });
 
   factory CategoryItem.fromMap(Map<String, dynamic> map) {
     return CategoryItem(
       id: map['id'],
       emoji: map['emoji'] ?? '',
       label: map['label'] ?? '',
+      isCommunity: map['isCommunity'] ?? false,
     );
   }
 
   Map<String, dynamic> toMap() {
-    return {'id': id, 'emoji': emoji, 'label': label};
+    return {
+      'id': id,
+      'emoji': emoji,
+      'label': label,
+      'isCommunity': isCommunity,
+    };
   }
 }
