@@ -10,6 +10,8 @@ import 'package:new_flutter_app/app/core/services/collection_refrence.dart';
 import 'package:new_flutter_app/app/core/utils/app_styles.dart';
 import 'package:new_flutter_app/app/global/controller/home_controller.dart';
 import 'package:new_flutter_app/app/global/widgets/glowing_icon_button.dart';
+import 'package:new_flutter_app/app/presentation/addPost/add_post_screen.dart';
+import 'package:new_flutter_app/app/presentation/addStory/add_story.dart';
 import 'package:new_flutter_app/app/presentation/cloudNotificationScreen/cloud_notification_screen.dart';
 import 'package:new_flutter_app/app/presentation/home/widgets/categories.dart';
 import 'package:new_flutter_app/app/presentation/home/widgets/drawer.dart';
@@ -476,6 +478,64 @@ class _HomeScreenState extends State<HomeScreen> {
                 );
               },
             ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          showModalBottomSheet(
+            backgroundColor: kCardColor,
+            context: Get.context!,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.vertical(top: Radius.circular(20.r)),
+            ),
+            builder: (_) {
+              return Padding(
+                padding: EdgeInsets.all(16.r),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    ListTile(
+                      leading: Icon(Icons.post_add, color: kSecondary),
+                      title: Text(
+                        "Add Post",
+                        style: appStyleLato(16, kWhite, FontWeight.w300),
+                      ),
+                      onTap: () {
+                        Get.back(); // Close the bottom sheet
+                        Get.to(
+                          () => AddPostScreen(),
+                          transition: Transition.downToUp,
+                          duration: Duration(milliseconds: 500),
+                        );
+                      },
+                    ),
+                    Divider(),
+                    ListTile(
+                      leading: Icon(Icons.history_edu, color: kSecondary),
+                      title: Text(
+                        "Add Story",
+                        style: appStyle(16, kWhite, FontWeight.w300),
+                      ),
+                      onTap: () {
+                        Get.back(); // Close the bottom sheet
+                        Get.to(
+                          () => AddStoryScreen(),
+                          transition: Transition.downToUp,
+                          duration: Duration(milliseconds: 500),
+                        ); // Replace with your AddStoryScreen
+                      },
+                    ),
+                  ],
+                ),
+              );
+            },
+          );
+        },
+        backgroundColor: kSecondary,
+        elevation: 4,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(50.r),
+        ),
+        child: Icon(Icons.edit, color: kWhite, size: 24.sp),
+      ),
     );
   }
 }

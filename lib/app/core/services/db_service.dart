@@ -26,6 +26,7 @@ class DatabaseServices {
       "fullName": fullName,
       "userName": userName,
       "bio": bio,
+      "isCommunityMember": false,
       "currentAddress": currentAddress,
       "emailAddress": emailAddress,
       "profilePicture":

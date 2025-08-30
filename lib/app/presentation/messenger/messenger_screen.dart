@@ -411,6 +411,7 @@ class _MessengerScreenState extends State<MessengerScreen> {
                   isActive: userData.isActive,
                   status: userData.status,
                   isOnline: userData.isOnline,
+                  isCommunityMember: userData.isCommunityMember,
                   posts: userData.posts,
                   stories: userData.stories,
                   followers: userData.followers,

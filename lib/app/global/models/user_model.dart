@@ -12,6 +12,7 @@ class UserModel {
   final bool isActive;
   final bool status;
   final bool isOnline;
+  final bool isCommunityMember;
   final List<dynamic> posts;
   final List<dynamic> stories;
   final List<dynamic> followers;
@@ -31,6 +32,7 @@ class UserModel {
     required this.isActive,
     required this.status,
     required this.isOnline,
+    required this.isCommunityMember,
     required this.posts,
     required this.stories,
     required this.followers,
@@ -52,6 +54,7 @@ class UserModel {
       isActive: data['isActive'] ?? true,
       status: data['status'] ?? true,
       isOnline: data['isOnline'] ?? false,
+      isCommunityMember: data['isCommunityMember'] ?? false,
       posts: List.from(data['posts'] ?? []),
       stories: List.from(data['stories'] ?? []),
       followers: List.from(data['followers'] ?? []),
@@ -74,6 +77,7 @@ class UserModel {
       'isActive': isActive,
       'status': status,
       'isOnline': isOnline,
+      'isCommunityMember': isCommunityMember,
       'posts': posts,
       'stories': stories,
       'followers': followers,
