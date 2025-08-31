@@ -59,20 +59,24 @@ class _AddPostScreenState extends State<AddPostScreen> {
   void fetchCategories() async {
     try {
       setState(() => _isLoadingCategories = true);
+
       final snapshot = await FirebaseFirestore.instance
           .collection("Categories")
           .get();
 
-      // Flatten all categories from all documents
+      // Flatten and filter categories
       _allCategories = [];
       for (var doc in snapshot.docs) {
         final categoryModel = CategoryModel.fromDoc(doc.id, doc.data());
-        _allCategories.addAll(categoryModel.lists);
+        _allCategories.addAll(
+          categoryModel.lists.where((item) => item.isCommunity == false),
+        );
       }
 
-      setState(() {});
+      setState(() {}); // trigger UI update
     } catch (e) {
-      // Handle error
+      // Handle error gracefully (maybe show a snackbar or toast)
+      debugPrint("Error fetching categories: $e");
     } finally {
       setState(() => _isLoadingCategories = false);
     }

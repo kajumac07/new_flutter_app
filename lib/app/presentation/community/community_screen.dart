@@ -9,6 +9,7 @@ import 'package:new_flutter_app/app/global/controller/community_controller.dart'
 import 'package:new_flutter_app/app/global/widgets/custom_container.dart';
 import 'package:new_flutter_app/app/global/widgets/glowing_icon_button.dart';
 import 'package:new_flutter_app/app/presentation/cloudNotificationScreen/cloud_notification_screen.dart';
+import 'package:new_flutter_app/app/presentation/community/widgets/create_community_post.dart';
 import 'package:new_flutter_app/app/presentation/profile/profile_details_screen.dart';
 
 class CommunityScreen extends StatefulWidget {
@@ -323,6 +324,7 @@ class _CommunityScreenState extends State<CommunityScreen> {
       floatingActionButton: Obx(() {
         if (controller.isMember.value) {
           return FloatingActionButton(
+            heroTag: "community_fab",
             onPressed: () {
               showModalBottomSheet(
                 context: context,
@@ -374,6 +376,10 @@ class _CommunityScreenState extends State<CommunityScreen> {
                           ),
                           onTap: () {
                             Navigator.pop(context);
+                            Get.to(
+                              () => CreateCommunityPostScreen(),
+                              transition: Transition.leftToRight,
+                            );
                             // Navigate to user selection screen
                           },
                         ),
